@@ -1,19 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { searchStories, Story } from '../data/stories';
 import { FavoriteButton } from '../components/FavoriteButton';
 import { useAuth } from '../context/AuthContext';
-
-interface Story {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  image_url: string;
-  author: string;
-  created_at: string;
-  category: string;
-}
 
 export function SearchResultsPage() {
   const [searchParams] = useSearchParams();
@@ -23,7 +12,7 @@ export function SearchResultsPage() {
   const { setShowLoginModal } = useAuth();
 
   useEffect(() => {
-    const searchStories = async () => {
+    const doSearch = () => {
       if (!query) {
         setStories([]);
         setLoading(false);
@@ -32,20 +21,13 @@ export function SearchResultsPage() {
 
       setLoading(true);
 
-      const { data, error } = await supabase
-        .from('stories')
-        .select('*')
-        .or(`title.ilike.%${query}%,excerpt.ilike.%${query}%,author.ilike.%${query}%`)
-        .order('created_at', { ascending: false });
-
-      if (!error && data) {
-        setStories(data);
-      }
+      const data = searchStories(query);
+      setStories(data);
 
       setLoading(false);
     };
 
-    searchStories();
+    doSearch();
   }, [query]);
 
   const formatDate = (dateString: string) => {
@@ -122,7 +104,7 @@ export function SearchResultsPage() {
                     </p>
                     <div className="flex items-center justify-between text-sm">
                       <Link
-                        to={`/author/${story.author.toLowerCase().replace(/\s+/g, '-')}`}
+                        to={`/author/${encodeURIComponent(story.author)}`}
                         className="text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors"
                         onClick={(e) => e.stopPropagation()}
                       >

@@ -1,20 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, User, Eye, ArrowLeft, Home } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-
-interface Story {
-  id: string;
-  slug: string;
-  title: string;
-  category: string;
-  excerpt: string;
-  content: string;
-  image_url: string;
-  author: string;
-  published_at: string;
-  views: number;
-}
+import { getStoryBySlug, getStories, incrementViews, Story } from '../data/stories';
 
 export function StoryPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -23,41 +10,22 @@ export function StoryPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchStory() {
+    function fetchStory() {
       if (!slug) return;
 
       setLoading(true);
 
-      const { data: storyData, error: storyError } = await supabase
-        .from('stories')
-        .select('*')
-        .eq('slug', slug)
-        .maybeSingle();
-
-      if (storyError) {
-        console.error('Error fetching story:', storyError);
-        setLoading(false);
-        return;
-      }
+      const storyData = getStoryBySlug(slug);
 
       if (storyData) {
-        await supabase
-          .from('stories')
-          .update({ views: (storyData.views || 0) + 1 })
-          .eq('slug', slug);
+        incrementViews(slug);
+        setStory({ ...storyData, views: storyData.views + 1 });
 
-        setStory({ ...storyData, views: (storyData.views || 0) + 1 });
-
-        const { data: relatedData } = await supabase
-          .from('stories')
-          .select('*')
-          .eq('category', storyData.category)
-          .neq('slug', slug)
-          .limit(3);
-
-        if (relatedData) {
-          setRelatedStories(relatedData);
-        }
+        const relatedData = getStories({ category: storyData.category, limit: 4 })
+          .filter(s => s.slug !== slug)
+          .slice(0, 3);
+        
+        setRelatedStories(relatedData);
       }
 
       setLoading(false);

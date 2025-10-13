@@ -1,19 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { getStories, Story } from '../data/stories';
 import { Calendar, User, Eye } from 'lucide-react';
-
-interface Story {
-  id: string;
-  slug: string;
-  title: string;
-  category: string;
-  excerpt: string;
-  image_url: string;
-  author: string;
-  published_at: string;
-  views: number;
-}
 
 const CATEGORY_MAPPING: Record<string, string> = {
   'sports': 'Sports',
@@ -33,25 +21,18 @@ export function CategoryPage() {
   const [currentCount, setCurrentCount] = useState(STORIES_PER_PAGE);
 
   useEffect(() => {
-    async function fetchStories() {
+    function fetchStories() {
       if (!category) return;
 
       setLoading(true);
       const categoryName = CATEGORY_MAPPING[category] || category;
 
-      const { data, error } = await supabase
-        .from('stories')
-        .select('*')
-        .eq('category', categoryName)
-        .order('published_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching stories:', error);
-      } else {
-        setStories(data || []);
-        setDisplayedStories((data || []).slice(0, STORIES_PER_PAGE));
-        setCurrentCount(STORIES_PER_PAGE);
-      }
+      const data = getStories({ category: categoryName, orderBy: 'published_at' });
+      
+      setStories(data || []);
+      setDisplayedStories((data || []).slice(0, STORIES_PER_PAGE));
+      setCurrentCount(STORIES_PER_PAGE);
+      
       setLoading(false);
     }
 

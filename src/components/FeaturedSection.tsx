@@ -1,20 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Eye } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { getStories, Story } from '../data/stories';
 import { FavoriteButton } from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
-
-interface Story {
-  id: string;
-  slug: string;
-  title: string;
-  category: string;
-  excerpt: string;
-  image_url: string;
-  views: number;
-  published_at: string;
-}
 
 export function FeaturedSection() {
   const { setShowLoginModal } = useAuth();
@@ -22,21 +11,12 @@ export function FeaturedSection() {
   const [trendingStories, setTrendingStories] = useState<Story[]>([]);
 
   useEffect(() => {
-    const fetchStories = async () => {
-      const { data: latest } = await supabase
-        .from('stories')
-        .select('*')
-        .order('published_at', { ascending: false })
-        .limit(4);
+    const fetchStories = () => {
+      const latest = getStories({ limit: 4, orderBy: 'published_at' });
+      const trending = getStories({ limit: 8, orderBy: 'views' });
 
-      const { data: trending } = await supabase
-        .from('stories')
-        .select('*')
-        .order('views', { ascending: false })
-        .limit(8);
-
-      if (latest) setLatestStories(latest);
-      if (trending) setTrendingStories(trending);
+      setLatestStories(latest);
+      setTrendingStories(trending);
     };
 
     fetchStories();

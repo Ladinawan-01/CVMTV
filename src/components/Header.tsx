@@ -1,7 +1,7 @@
 import { Menu, Search, Moon, Sun } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { getStories } from '../data/stories';
 import { UserAvatar } from './UserAvatar';
 
 export function Header() {
@@ -25,16 +25,12 @@ export function Header() {
   }, [darkMode]);
 
   useEffect(() => {
-    const fetchHeadlines = async () => {
-      const { data } = await supabase
-        .from('stories')
-        .select('title, slug')
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      if (data) {
-        setNewsHeadlines(data);
-      }
+    const fetchHeadlines = () => {
+      const data = getStories({ limit: 10, orderBy: 'published_at' }).map(s => ({
+        title: s.title,
+        slug: s.slug
+      }));
+      setNewsHeadlines(data);
     };
 
     fetchHeadlines();

@@ -17,9 +17,13 @@ import { TermsPage } from './pages/TermsPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { UserProfilePage } from './pages/UserProfilePage';
+import { ApiTestPage } from './pages/ApiTestPage';
+import { ApiDebugPage } from './pages/ApiDebugPage';
 import { FavoritesPage } from './pages/FavoritesPage';
 import { SearchResultsPage } from './pages/SearchResultsPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { UserProvider } from './context/UserContext';
 
 function AppContent() {
   const location = useLocation();
@@ -52,6 +56,9 @@ function AppContent() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/user-profile" element={<UserProfilePage />} />
+        <Route path="/api-test" element={<ApiTestPage />} />
+        <Route path="/api-debug" element={<ApiDebugPage />} />
         <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="/search" element={<SearchResultsPage />} />
       </Routes>
@@ -64,7 +71,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppContent />
+        <UserProvider>
+          <AppContent />
+        </UserProvider>
       </AuthProvider>
     </BrowserRouter>
   );

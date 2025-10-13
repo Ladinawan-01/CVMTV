@@ -1,158 +1,79 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { User, Mail, Save, X, Lock, AtSign } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { ImageUpload } from '../components/ImageUpload';
-
-interface UserProfile {
-  email: string;
-  username: string;
-  full_name: string;
-  profile_image_url: string;
-  bio: string;
-}
+import { User, Mail, Save, X, Lock, Loader, Phone } from 'lucide-react';
+import { useUser } from '../context/UserContext';
 
 export function ProfilePage() {
-  const navigate = useNavigate();
-  const [user, setUser] = useState<{ email: string; isLoggedIn: boolean } | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const { user, loading, error, updateProfile, refreshUser } = useUser();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  const [editedProfile, setEditedProfile] = useState<UserProfile>({
+  const [editedProfile, setEditedProfile] = useState({
+    name: '',
     email: '',
-    username: '',
-    full_name: '',
-    profile_image_url: '',
-    bio: ''
+    mobile: ''
   });
-
+  console.log(user,'user')
+  console.log('Mobile value:', user?.mobile)
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
 
+  // Initialize form data when user data changes
   useEffect(() => {
-    const storedUser = localStorage.getItem('demoUser');
-    if (!storedUser) {
-      navigate('/login');
-      return;
+    if (user) {
+      setEditedProfile({
+        name: user.name || '',
+        email: user.email || '',
+        mobile: user.mobile || ''
+      });
     }
-    const userData = JSON.parse(storedUser);
-    setUser(userData);
-    loadProfile(userData.email);
-  }, [navigate]);
+  }, [user]);
 
-  const loadProfile = async (email: string) => {
-    setLoading(true);
-    const { data } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('email', email)
-      .maybeSingle();
-
-    if (data) {
-      setProfile(data);
-      setEditedProfile(data);
-    } else {
-      const defaultProfile = {
-        email,
-        username: '',
-        full_name: '',
-        profile_image_url: '',
-        bio: ''
-      };
-      setProfile(defaultProfile);
-      setEditedProfile(defaultProfile);
-    }
-    setLoading(false);
-  };
-
+  // // Redirect to login if no user
+  // useEffect(() => {
+  //   if (!loading && !user) {
+  //     navigate('/login');
+  //   }
+  // }, [user, loading, navigate]);
+  
   const handleSaveProfile = async () => {
     if (!user) return;
 
-    if (editedProfile.username && editedProfile.username.length < 3) {
-      alert('Username must be at least 3 characters');
+    if (!editedProfile.name.trim()) {
+      alert('Name is required');
       return;
     }
 
-    if (editedProfile.email !== user.email) {
-      const emailExists = localStorage.getItem(`password_${editedProfile.email}`);
-      if (emailExists) {
-        alert('This email is already registered');
-        return;
-      }
+    if (!editedProfile.email.trim()) {
+      alert('Email is required');
+      return;
     }
 
     setSaving(true);
     try {
-      const { data: existingProfile } = await supabase
-        .from('user_profiles')
-        .select('id')
-        .eq('email', user.email)
-        .maybeSingle();
-
-      if (existingProfile) {
-        const { error } = await supabase
-          .from('user_profiles')
-          .update({
-            email: editedProfile.email,
-            username: editedProfile.username,
-            full_name: editedProfile.full_name,
-            profile_image_url: editedProfile.profile_image_url,
-            bio: editedProfile.bio,
-            updated_at: new Date().toISOString()
-          })
-          .eq('email', user.email);
-
-        if (error) {
-          alert('Failed to update profile: ' + error.message);
-          return;
-        }
+      console.log('Saving profile with data:', editedProfile);
+      const success = await updateProfile(editedProfile);
+      
+      if (success) {
+        setIsEditing(false);
+        alert('Profile updated successfully!');
+        console.log('Profile update successful');
+        // No need to call refreshUser - updateProfile already updates the user data
+        // The UI will automatically re-render with the updated user data from context
       } else {
-        const { error } = await supabase
-          .from('user_profiles')
-          .insert({
-            email: editedProfile.email,
-            username: editedProfile.username,
-            full_name: editedProfile.full_name,
-            profile_image_url: editedProfile.profile_image_url,
-            bio: editedProfile.bio
-          });
-
-        if (error) {
-          alert('Failed to create profile: ' + error.message);
-          return;
-        }
+        alert('Failed to update profile. Please try again.');
       }
-
-      if (editedProfile.email !== user.email) {
-        const oldPassword = localStorage.getItem(`password_${user.email}`);
-        if (oldPassword) {
-          localStorage.setItem(`password_${editedProfile.email}`, oldPassword);
-          localStorage.removeItem(`password_${user.email}`);
-        }
-
-        const updatedUser = { ...user, email: editedProfile.email };
-        localStorage.setItem('demoUser', JSON.stringify(updatedUser));
-        setUser(updatedUser);
-      }
-
-      setProfile(editedProfile);
-      setIsEditing(false);
-      alert('Profile updated successfully!');
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert('Failed to save profile');
+      alert('An error occurred while updating profile');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleChangePassword = async () => {
+  const handleChangePassword = () => {
     if (!user) return;
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -183,25 +104,54 @@ export function ProfilePage() {
   };
 
   const cancelEdit = () => {
-    setEditedProfile(profile || {
-      email: user?.email || '',
-      username: '',
-      full_name: '',
-      profile_image_url: '',
-      bio: ''
-    });
+    if (user) {
+      setEditedProfile({
+        name: user.name || '',
+        email: user.email || '',
+        mobile: user.mobile || ''
+      });
+    }
     setIsEditing(false);
   };
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+        <div className="text-center">
+          <Loader className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" />
+          <div className="text-gray-600 dark:text-gray-400">Loading profile...</div>
+        </div>
       </div>
     );
   }
 
-  const displayName = profile?.full_name || profile?.username || 'User';
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-gray-600 dark:text-gray-400">No user data available</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 mb-4">Error: {error}</div>
+          <button 
+            onClick={() => refreshUser(user?.id)}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const displayName = user.name || 'User';
   const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
@@ -210,9 +160,9 @@ export function ProfilePage() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
           <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 mb-6 sm:mb-8">
             <div className="relative">
-              {profile?.profile_image_url ? (
+              {user.profile ? (
                 <img
-                  src={profile.profile_image_url}
+                  src={user.profile}
                   alt={displayName}
                   className="w-24 h-24 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
                 />
@@ -226,8 +176,8 @@ export function ProfilePage() {
               {isEditing ? (
                 <input
                   type="text"
-                  value={editedProfile.full_name}
-                  onChange={(e) => setEditedProfile({ ...editedProfile, full_name: e.target.value })}
+                  value={editedProfile.name}
+                  onChange={(e) => setEditedProfile({ ...editedProfile, name: e.target.value })}
                   placeholder="Full Name"
                   className="text-3xl font-bold text-gray-900 dark:text-white mb-2 bg-gray-50 dark:bg-gray-700 px-3 py-1 rounded w-full"
                 />
@@ -270,14 +220,6 @@ export function ProfilePage() {
             </div>
           </div>
 
-          {isEditing && (
-            <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <ImageUpload
-                currentImage={editedProfile.profile_image_url}
-                onImageChange={(imageData) => setEditedProfile({ ...editedProfile, profile_image_url: imageData })}
-              />
-            </div>
-          )}
 
           <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
@@ -298,49 +240,59 @@ export function ProfilePage() {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   />
                 ) : (
-                  <p className="font-semibold text-gray-900 dark:text-white">{profile?.email}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">{user.email}</p>
                 )}
               </div>
-
               <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <div className="flex items-center gap-3 mb-2">
-                  <AtSign className="text-gray-600 dark:text-gray-400" size={20} />
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Username</p>
+                  <User className="text-gray-600 dark:text-gray-400" size={20} />
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Name</p>
                 </div>
                 {isEditing ? (
                   <input
                     type="text"
-                    value={editedProfile.username}
-                    onChange={(e) => setEditedProfile({ ...editedProfile, username: e.target.value })}
-                    placeholder="Choose a username"
+                    value={editedProfile.name}
+                    onChange={(e) => setEditedProfile({ ...editedProfile, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  />
+                ) : (
+                  <p className="font-semibold text-gray-900 dark:text-white">{user.name}</p>
+                )}
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div className="flex items-center gap-3 mb-2">
+                  <Phone className="text-gray-600 dark:text-gray-400" size={20} />
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Mobile</p>
+                </div>
+                {isEditing ? (
+                  <input
+                    type="tel"
+                    value={editedProfile.mobile}
+                    onChange={(e) => setEditedProfile({ ...editedProfile, mobile: e.target.value })}
+                    placeholder="Enter mobile number"
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   />
                 ) : (
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {profile?.username || 'Not set'}
+                    {user.mobile || 'Not set'}
                   </p>
                 )}
               </div>
 
+             
+
               <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <div className="flex items-center gap-3 mb-2">
                   <User className="text-gray-600 dark:text-gray-400" size={20} />
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Bio</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Status</p>
                 </div>
-                {isEditing ? (
-                  <textarea
-                    value={editedProfile.bio}
-                    onChange={(e) => setEditedProfile({ ...editedProfile, bio: e.target.value })}
-                    placeholder="Tell us about yourself..."
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                  />
-                ) : (
-                  <p className="text-gray-900 dark:text-white">
-                    {profile?.bio || 'No bio added yet'}
-                  </p>
-                )}
+                <p className={`font-semibold ${
+                  user.status === 1 ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {user.status === 1 ? 'Active' : 'Inactive'}
+                </p>
               </div>
+ 
             </div>
           </div>
 

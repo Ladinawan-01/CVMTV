@@ -1,41 +1,22 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Eye } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { getStories, Story } from '../data/stories';
 import { FavoriteButton } from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
-
-interface Story {
-  id: string;
-  slug: string;
-  title: string;
-  category: string;
-  excerpt: string;
-  image_url: string;
-  views: number;
-  published_at: string;
-}
 
 export function NewsGrid() {
   const { setShowLoginModal } = useAuth();
   const [storiesByCategory, setStoriesByCategory] = useState<Record<string, Story[]>>({});
 
   useEffect(() => {
-    const fetchStories = async () => {
+    const fetchStories = () => {
       const categories = ['News', 'Politics', 'Business'];
       const results: Record<string, Story[]> = {};
 
       for (const category of categories) {
-        const { data } = await supabase
-          .from('stories')
-          .select('*')
-          .eq('category', category)
-          .order('published_at', { ascending: false })
-          .limit(6);
-
-        if (data) {
-          results[category] = data;
-        }
+        const data = getStories({ category, limit: 6, orderBy: 'published_at' });
+        results[category] = data;
       }
 
       setStoriesByCategory(results);

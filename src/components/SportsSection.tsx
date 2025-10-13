@@ -1,19 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Eye } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { getStories, Story } from '../data/stories';
 import { FavoriteButton } from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
-
-interface Story {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  image_url: string;
-  views: number;
-  published_at: string;
-}
 
 export function SportsSection() {
   const { setShowLoginModal } = useAuth();
@@ -21,13 +11,8 @@ export function SportsSection() {
   const [sideStories, setSideStories] = useState<Story[]>([]);
 
   useEffect(() => {
-    const fetchSportsStories = async () => {
-      const { data } = await supabase
-        .from('stories')
-        .select('*')
-        .eq('category', 'Sports')
-        .order('published_at', { ascending: false })
-        .limit(7);
+    const fetchSportsStories = () => {
+      const data = getStories({ category: 'Sports', limit: 7, orderBy: 'published_at' });
 
       if (data && data.length > 0) {
         setMainStory(data[0]);

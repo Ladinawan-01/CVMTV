@@ -1,28 +1,44 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Heart, LogOut } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { getUserProfile } from '../data/stories';
 
 interface UserProfile {
-  username: string;
-  full_name: string;
-  profile_image_url: string;
+  username?: string;
+  full_name?: string;
+  profile_image_url?: string;
+  name?: string;
+  profile?: string;
 }
 
 export function UserAvatar() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<{ email: string; isLoggedIn: boolean } | null>(null);
+  const [user, setUser] = useState<{ email: string; name?: string; isLoggedIn: boolean } | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkUser = () => {
       const storedUser = localStorage.getItem('demoUser');
+      const storedFullUser = localStorage.getItem('user');
+      
       if (storedUser) {
         const userData = JSON.parse(storedUser);
         setUser(userData);
-        loadProfile(userData.email);
+        
+        // Try to load full user data from API response
+        if (storedFullUser) {
+          const fullUserData = JSON.parse(storedFullUser);
+          setProfile({
+            name: fullUserData.name,
+            full_name: fullUserData.name,
+            profile_image_url: fullUserData.profile,
+            profile: fullUserData.profile,
+          });
+        } else {
+          loadProfile(userData.email);
+        }
       } else {
         setUser(null);
         setProfile(null);
@@ -39,13 +55,8 @@ export function UserAvatar() {
     };
   }, []);
 
-  const loadProfile = async (email: string) => {
-    const { data } = await supabase
-      .from('user_profiles')
-      .select('username, full_name, profile_image_url')
-      .eq('email', email)
-      .maybeSingle();
-
+  const loadProfile = (email: string) => {
+    const data = getUserProfile(email);
     if (data) {
       setProfile(data);
     }
@@ -81,8 +92,9 @@ export function UserAvatar() {
     );
   }
 
-  const displayName = profile?.full_name || profile?.username || 'User';
+  const displayName = profile?.name || profile?.full_name || profile?.username || user?.name || 'User';
   const avatarInitial = displayName.charAt(0).toUpperCase();
+  const avatarImage = profile?.profile_image_url || profile?.profile;
 
   return (
     <>
@@ -94,9 +106,9 @@ export function UserAvatar() {
           aria-expanded={isOpen}
           aria-haspopup="true"
         >
-          {profile?.profile_image_url ? (
+          {avatarImage ? (
             <img
-              src={profile.profile_image_url}
+              src={avatarImage}
               alt={displayName}
               className="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-gray-700"
             />
@@ -129,6 +141,24 @@ export function UserAvatar() {
             >
               <User size={16} />
               Profile
+            </Link>
+
+            <Link
+              to="/user-profile"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <User size={16} />
+              User Data
+            </Link>
+
+            <Link
+              to="/api-test"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <User size={16} />
+              API Test
             </Link>
 
             <Link

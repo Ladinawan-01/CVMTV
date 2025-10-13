@@ -1,19 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { User, Calendar, Eye } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-
-interface Story {
-  id: string;
-  slug: string;
-  title: string;
-  category: string;
-  excerpt: string;
-  image_url: string;
-  author: string;
-  published_at: string;
-  views: number;
-}
+import { getStories, Story } from '../data/stories';
 
 export function AuthorPage() {
   const { author } = useParams<{ author: string }>();
@@ -21,24 +9,15 @@ export function AuthorPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchAuthorStories() {
+    function fetchAuthorStories() {
       if (!author) return;
 
       setLoading(true);
 
       const decodedAuthor = decodeURIComponent(author);
 
-      const { data, error } = await supabase
-        .from('stories')
-        .select('*')
-        .eq('author', decodedAuthor)
-        .order('published_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching author stories:', error);
-      } else if (data) {
-        setStories(data);
-      }
+      const data = getStories({ author: decodedAuthor, orderBy: 'published_at' });
+      setStories(data || []);
 
       setLoading(false);
     }

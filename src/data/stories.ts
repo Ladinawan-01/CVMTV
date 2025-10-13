@@ -1,4 +1,24 @@
-export const stories = [
+export interface Story {
+  id: string;
+  slug: string;
+  title: string;
+  category: string;
+  excerpt: string;
+  content: string;
+  image_url: string;
+  author: string;
+  published_at: string;
+  views: number;
+  created_at: string;
+}
+
+// Generate random IDs for each story
+function generateId(slug: string): string {
+  return slug.split('-').join('').substring(0, 8);
+}
+
+// Add timestamps and IDs to stories
+const storiesData = [
   {
     slug: 'global-leaders-climate-summit',
     title: 'Global Leaders Convene for Climate Summit as Environmental Concerns Escalate',
@@ -338,3 +358,105 @@ The agreements establish frameworks for joint initiatives in areas such as renew
 Diplomatic observers note that these partnerships represent a positive trend toward multilateral problem-solving and mutual support. The success of regional cooperation demonstrates that nations can achieve more by working together than through isolated national efforts.`
   }
 ];
+
+// Create stories with proper structure
+export const stories: Story[] = storiesData.map((story, index) => ({
+  id: generateId(story.slug),
+  slug: story.slug,
+  title: story.title,
+  category: story.category,
+  excerpt: story.excerpt,
+  content: story.content,
+  image_url: story.image_url,
+  author: story.author,
+  published_at: new Date(Date.now() - index * 3600000).toISOString(),
+  views: Math.floor(Math.random() * 10000) + 1000,
+  created_at: new Date(Date.now() - index * 3600000).toISOString(),
+}));
+
+// Helper functions to simulate database operations
+export const getStories = (filters?: { category?: string; author?: string; limit?: number; orderBy?: 'views' | 'published_at' }) => {
+  let result = [...stories];
+  
+  if (filters?.category) {
+    result = result.filter(s => s.category.toLowerCase() === filters.category?.toLowerCase());
+  }
+  
+  if (filters?.author) {
+    result = result.filter(s => s.author === filters.author);
+  }
+  
+  if (filters?.orderBy === 'views') {
+    result = result.sort((a, b) => b.views - a.views);
+  } else if (filters?.orderBy === 'published_at') {
+    result = result.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
+  }
+  
+  if (filters?.limit) {
+    result = result.slice(0, filters.limit);
+  }
+  
+  return result;
+};
+
+export const getStoryBySlug = (slug: string): Story | undefined => {
+  return stories.find(s => s.slug === slug);
+};
+
+export const searchStories = (query: string): Story[] => {
+  const lowerQuery = query.toLowerCase();
+  return stories.filter(s => 
+    s.title.toLowerCase().includes(lowerQuery) ||
+    s.excerpt.toLowerCase().includes(lowerQuery) ||
+    s.author.toLowerCase().includes(lowerQuery)
+  );
+};
+
+export const incrementViews = (slug: string) => {
+  const story = stories.find(s => s.slug === slug);
+  if (story) {
+    story.views += 1;
+  }
+};
+
+// User profiles stored in localStorage
+export const getUserProfile = (email: string) => {
+  const profiles = JSON.parse(localStorage.getItem('userProfiles') || '{}');
+  return profiles[email] || null;
+};
+
+export const saveUserProfile = (email: string, profile: any) => {
+  const profiles = JSON.parse(localStorage.getItem('userProfiles') || '{}');
+  profiles[email] = { ...profile, email, updated_at: new Date().toISOString() };
+  localStorage.setItem('userProfiles', JSON.stringify(profiles));
+};
+
+// Favorites stored in localStorage
+export const getFavorites = (userEmail: string): string[] => {
+  const favorites = JSON.parse(localStorage.getItem('favorites') || '{}');
+  return favorites[userEmail] || [];
+};
+
+export const addFavorite = (userEmail: string, storySlug: string) => {
+  const favorites = JSON.parse(localStorage.getItem('favorites') || '{}');
+  if (!favorites[userEmail]) {
+    favorites[userEmail] = [];
+  }
+  if (!favorites[userEmail].includes(storySlug)) {
+    favorites[userEmail].push(storySlug);
+  }
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+};
+
+export const removeFavorite = (userEmail: string, storySlug: string) => {
+  const favorites = JSON.parse(localStorage.getItem('favorites') || '{}');
+  if (favorites[userEmail]) {
+    favorites[userEmail] = favorites[userEmail].filter((slug: string) => slug !== storySlug);
+  }
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+};
+
+export const isFavorited = (userEmail: string, storySlug: string): boolean => {
+  const favorites = getFavorites(userEmail);
+  return favorites.includes(storySlug);
+};
