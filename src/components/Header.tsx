@@ -134,7 +134,7 @@ export function Header() {
             <Link to="/" className="text-sm font-semibold text-gray-900 dark:text-white hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors">
               HOME
             </Link>
-            <Link to="/live" className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors">
+            <Link to="https://live.cvmtv.com/" className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors">
               CVM LIVE
             </Link>
             {categories.map((category) => (
