@@ -1,22 +1,67 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Eye } from 'lucide-react';
-import { getStories, Story } from '../data/stories';
 import { FavoriteButton } from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
+import { apiClient } from '../lib/apiClient';
+
+interface Story {
+  id: number;
+  title: string;
+  slug: string;
+  image: string;
+  category_name: string;
+  description: string;
+  date: string;
+  total_views: number;
+}
 
 export function FeaturedSection() {
   const { setShowLoginModal } = useAuth();
   const [latestStories, setLatestStories] = useState<Story[]>([]);
   const [trendingStories, setTrendingStories] = useState<Story[]>([]);
+  const [adBanner, setAdBanner] = useState<string>('');
 
   useEffect(() => {
-    const fetchStories = () => {
-      const latest = getStories({ limit: 4, orderBy: 'published_at' });
-      const trending = getStories({ limit: 8, orderBy: 'views' });
+    const fetchStories = async () => {
+      try {
+        const response = await apiClient.getFeaturedSections({
+          language_id: 1,
+          offset: 0,
+          limit: 9,
+        });
 
-      setLatestStories(latest);
-      setTrendingStories(trending);
+        if (response.success && response.data?.data) {
+          // Find the "Lead Stories" or first section
+          const leadSection = response.data.data.find((s: any) => 
+            s.slug === 'lead-stories' || s.title.toLowerCase().includes('lead')
+          ) || response.data.data[0];
+
+          if (leadSection && leadSection.news) {
+            // Map API data to Story format
+            const stories = leadSection.news.map((news: any) => ({
+              id: news.id,
+              title: news.title,
+              slug: news.slug,
+              image: news.image,
+              category_name: news.category_name,
+              description: news.description,
+              date: news.date,
+              total_views: news.total_views || 0,
+            }));
+
+            setLatestStories(stories.slice(0, 4));
+            setTrendingStories(stories.slice(0, 8));
+
+            // Set ad banner if available
+            if (leadSection.ad_spaces && leadSection.ad_spaces.length > 0) {
+              setAdBanner(leadSection.ad_spaces[0].web_ad_image || leadSection.ad_spaces[0].ad_image);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching featured stories:', error);
+      }
     };
 
     fetchStories();
@@ -39,12 +84,18 @@ export function FeaturedSection() {
     }
   };
 
+  const stripHtml = (html: string) => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  };
+
   return (
     <section className="bg-white dark:bg-gray-950 py-8 sm:py-12 border-t border-gray-200 dark:border-gray-800 transition-colors overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
         <div className="mb-6 sm:mb-8 flex justify-center">
           <img
-            src="/cvmtv-banner.png"
+            src={adBanner || "/cvmtv-banner.png"}
             alt="Advertisement"
             className="max-w-full h-auto"
           />
@@ -63,28 +114,28 @@ export function FeaturedSection() {
                       onLoginRequired={() => setShowLoginModal(true)}
                     />
                     <img
-                      src={story.image_url}
+                      src={story.image}
                       alt={story.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
                   <div className="flex-1">
                     <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase">
-                      {story.category}
+                      {story.category_name}
                     </span>
-                    <h4 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mt-2 mb-2 group-hover:text-yellow-500 dark:group-hover:text-yellow-400 transition-colors">
-                      {story.title}
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2">
-                      {story.excerpt}
-                    </p>
-                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                      <span>{formatTimeAgo(story.published_at)}</span>
-                      <div className="flex items-center gap-1">
-                        <Eye size={12} />
-                        <span>{story.views.toLocaleString()} views</span>
+                      <h4 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mt-2 mb-2 group-hover:text-yellow-500 dark:group-hover:text-yellow-400 transition-colors">
+                        {story.title}
+                      </h4>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2">
+                        {stripHtml(story.description)}
+                      </p>
+                      <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                        <span>{formatTimeAgo(story.date)}</span>
+                        <div className="flex items-center gap-1">
+                          <Eye size={12} />
+                          <span>{story.total_views.toLocaleString()} views</span>
+                        </div>
                       </div>
-                    </div>
                   </div>
                 </Link>
               ))}
@@ -102,13 +153,13 @@ export function FeaturedSection() {
                     {String(idx + 1).padStart(2, '0')}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-yellow-500 dark:group-hover:text-yellow-400 transition-colors leading-tight mb-1">
-                      {story.title}
-                    </h4>
-                    <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                      <Eye size={12} />
-                      <span>{story.views.toLocaleString()} views</span>
-                    </div>
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-yellow-500 dark:group-hover:text-yellow-400 transition-colors leading-tight mb-1">
+                        {story.title}
+                      </h4>
+                      <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                        <Eye size={12} />
+                        <span>{story.total_views.toLocaleString()} views</span>
+                      </div>
                   </div>
                 </Link>
               ))}

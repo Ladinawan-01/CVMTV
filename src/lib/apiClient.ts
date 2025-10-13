@@ -228,9 +228,19 @@ class CVMApiClient {
       
       // Trigger user login event
       window.dispatchEvent(new Event('userLogin'));
+      
+      // Return the extracted user data
+      return {
+        success: true,
+        data: userData,
+        message: response.data?.message
+      };
     }
     
-    return response as ApiResponse<UserData>;
+    return {
+      success: false,
+      error: response.error || 'Signup failed'
+    };
   }
 
   /**
@@ -264,9 +274,19 @@ class CVMApiClient {
       
       // Trigger user login event
       window.dispatchEvent(new Event('userLogin'));
+      
+      // Return the extracted user data
+      return {
+        success: true,
+        data: userData,
+        message: response.data?.message
+      };
     }
     
-    return response as ApiResponse<UserData>;
+    return {
+      success: false,
+      error: response.error || 'Signin failed'
+    };
   }
 
   /**
@@ -363,6 +383,67 @@ class CVMApiClient {
    */
   async searchStories(query: string): Promise<ApiResponse> {
     return this.get(`/stories/search?q=${encodeURIComponent(query)}`);
+  }
+
+  /**
+   * Get featured sections with news
+   * GET /get_featured_sections
+   */
+  async getFeaturedSections(params?: {
+    language_id?: number;
+    offset?: number;
+    limit?: number;
+    slug?: string;
+    latitude?: string;
+    longitude?: string;
+    section_id?: string;
+  }): Promise<ApiResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('language_id', (params?.language_id || 1).toString());
+    queryParams.append('offset', (params?.offset || 0).toString());
+    queryParams.append('limit', (params?.limit || 9).toString());
+    if (params?.slug) queryParams.append('slug', params.slug);
+    if (params?.latitude) queryParams.append('latitude', params.latitude);
+    if (params?.longitude) queryParams.append('longitude', params.longitude);
+    if (params?.section_id) queryParams.append('section_id', params.section_id);
+
+    return this.get(`/get_featured_sections?${queryParams.toString()}`);
+  }
+
+  /**
+   * Get categories
+   * GET /get_category
+   */
+  async getCategories(params?: {
+    language_id?: number;
+    offset?: number;
+    limit?: number;
+  }): Promise<ApiResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('language_id', (params?.language_id || 1).toString());
+    queryParams.append('offset', (params?.offset || 0).toString());
+    queryParams.append('limit', (params?.limit || 15).toString());
+
+    return this.get(`/get_category?${queryParams.toString()}`);
+  }
+
+  /**
+   * Get news by category slug
+   * GET /get_news
+   */
+  async getNewsByCategory(params: {
+    category_slug: string;
+    language_id?: number;
+    offset?: number;
+    limit?: number;
+  }): Promise<ApiResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('category_slug', params.category_slug);
+    queryParams.append('language_id', (params?.language_id || 1).toString());
+    queryParams.append('offset', (params?.offset || 0).toString());
+    queryParams.append('limit', (params?.limit || 20).toString());
+
+    return this.get(`/get_news?${queryParams.toString()}`);
   }
 
   // ============================================

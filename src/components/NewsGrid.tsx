@@ -1,25 +1,61 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Eye } from 'lucide-react';
-import { getStories, Story } from '../data/stories';
 import { FavoriteButton } from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
+import { apiClient } from '../lib/apiClient';
+
+interface Story {
+  id: number;
+  title: string;
+  slug: string;
+  image: string;
+  category_name: string;
+  date: string;
+  total_views: number;
+}
 
 export function NewsGrid() {
   const { setShowLoginModal } = useAuth();
   const [storiesByCategory, setStoriesByCategory] = useState<Record<string, Story[]>>({});
 
   useEffect(() => {
-    const fetchStories = () => {
-      const categories = ['News', 'Politics', 'Business'];
-      const results: Record<string, Story[]> = {};
+    const fetchStories = async () => {
+      try {
+        const response = await apiClient.getFeaturedSections({
+          language_id: 1,
+          offset: 0,
+          limit: 9,
+        });
 
-      for (const category of categories) {
-        const data = getStories({ category, limit: 6, orderBy: 'published_at' });
-        results[category] = data;
+        if (response.success && response.data?.data) {
+          const results: Record<string, Story[]> = {};
+          
+          // Map sections to categories
+          const sections = response.data.data;
+          
+          sections.forEach((section: any) => {
+            if (section.news && section.news.length > 0) {
+              const stories = section.news.slice(0, 6).map((news: any) => ({
+                id: news.id,
+                title: news.title,
+                slug: news.slug,
+                image: news.image,
+                category_name: news.category_name,
+                date: news.date,
+                total_views: news.total_views || 0,
+              }));
+              
+              // Use section title as category name
+              results[section.title] = stories;
+            }
+          });
+
+          setStoriesByCategory(results);
+        }
+      } catch (error) {
+        console.error('Error fetching news grid:', error);
       }
-
-      setStoriesByCategory(results);
     };
 
     fetchStories();
@@ -42,11 +78,13 @@ export function NewsGrid() {
     }
   };
 
-  const categoryConfig = [
-    { name: 'News', color: 'text-blue-600 dark:text-blue-400', borderColor: 'border-blue-600 dark:border-blue-400' },
-    { name: 'Politics', color: 'text-blue-600 dark:text-blue-400', borderColor: 'border-blue-600 dark:border-blue-400' },
-    { name: 'Business', color: 'text-blue-600 dark:text-blue-400', borderColor: 'border-blue-600 dark:border-blue-400' }
-  ];
+  // Get first 3 categories from API data
+  const categoryKeys = Object.keys(storiesByCategory).slice(0, 3);
+  const categoryConfig = categoryKeys.map(name => ({
+    name,
+    color: 'text-blue-600 dark:text-blue-400',
+    borderColor: 'border-blue-600 dark:border-blue-400'
+  }));
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900 py-8 sm:py-12 transition-colors overflow-hidden">
@@ -68,22 +106,22 @@ export function NewsGrid() {
                           storyId={storiesByCategory[config.name][0].slug}
                           onLoginRequired={() => setShowLoginModal(true)}
                         />
-                        <img
-                          src={storiesByCategory[config.name][0].image_url}
-                          alt={storiesByCategory[config.name][0].title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
+                      <img
+                        src={storiesByCategory[config.name][0].image}
+                        alt={storiesByCategory[config.name][0].title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                       </div>
                       <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-yellow-500 dark:group-hover:text-yellow-400 transition-colors leading-tight">
                         {storiesByCategory[config.name][0].title}
                       </h4>
-                      <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                        <span>{formatTimeAgo(storiesByCategory[config.name][0].published_at)}</span>
-                        <div className="flex items-center gap-1">
-                          <Eye size={12} />
-                          <span>{storiesByCategory[config.name][0].views.toLocaleString()} views</span>
-                        </div>
+                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                      <span>{formatTimeAgo(storiesByCategory[config.name][0].date)}</span>
+                      <div className="flex items-center gap-1">
+                        <Eye size={12} />
+                        <span>{storiesByCategory[config.name][0].total_views.toLocaleString()} views</span>
                       </div>
+                    </div>
                     </Link>
 
                     {storiesByCategory[config.name].length > 1 && (

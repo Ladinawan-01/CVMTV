@@ -1,9 +1,20 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Eye } from 'lucide-react';
-import { getStories, Story } from '../data/stories';
 import { FavoriteButton } from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
+import { apiClient } from '../lib/apiClient';
+
+interface Story {
+  id: number;
+  title: string;
+  slug: string;
+  image: string;
+  category_name: string;
+  description: string;
+  date: string;
+  total_views: number;
+}
 
 export function EntertainmentSection() {
   const { setShowLoginModal } = useAuth();
@@ -11,12 +22,38 @@ export function EntertainmentSection() {
   const [sideStories, setSideStories] = useState<Story[]>([]);
 
   useEffect(() => {
-    const fetchEntertainmentStories = () => {
-      const data = getStories({ category: 'Entertainment', limit: 7, orderBy: 'published_at' });
+    const fetchEntertainmentStories = async () => {
+      try {
+        const response = await apiClient.getFeaturedSections({
+          language_id: 1,
+          offset: 0,
+          limit: 9,
+        });
 
-      if (data && data.length > 0) {
-        setMainStory(data[0]);
-        setSideStories(data.slice(1));
+        if (response.success && response.data?.data) {
+          // Find Entertainment section
+          const section = response.data.data.find((s: any) => 
+            s.title.toLowerCase().includes('entertainment') || s.slug === 'entertainment'
+          ) || response.data.data[4]; // Use 5th section as fallback
+
+          if (section && section.news && section.news.length > 0) {
+            const stories = section.news.slice(0, 7).map((news: any) => ({
+              id: news.id,
+              title: news.title,
+              slug: news.slug,
+              image: news.image,
+              category_name: news.category_name,
+              description: news.description,
+              date: news.date,
+              total_views: news.total_views || 0,
+            }));
+
+            setMainStory(stories[0]);
+            setSideStories(stories.slice(1));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching entertainment stories:', error);
       }
     };
 
@@ -63,7 +100,7 @@ export function EntertainmentSection() {
                 onLoginRequired={() => setShowLoginModal(true)}
               />
               <img
-                src={mainStory.image_url}
+                src={mainStory.image}
                 alt={mainStory.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
@@ -72,13 +109,13 @@ export function EntertainmentSection() {
               {mainStory.title}
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-2 text-lg">
-              {mainStory.excerpt}
+              {mainStory.description.replace(/<[^>]*>/g, '').substring(0, 150)}...
             </p>
             <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-              <span>{getTimeAgo(mainStory.created_at)}</span>
+              <span>{getTimeAgo(mainStory.date)}</span>
               <div className="flex items-center gap-1">
                 <Eye size={14} />
-                <span>{mainStory.views.toLocaleString()} views</span>
+                <span>{mainStory.total_views.toLocaleString()} views</span>
               </div>
             </div>
           </Link>
@@ -92,7 +129,7 @@ export function EntertainmentSection() {
                     onLoginRequired={() => setShowLoginModal(true)}
                   />
                   <img
-                    src={story.image_url}
+                    src={story.image}
                     alt={story.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -101,10 +138,10 @@ export function EntertainmentSection() {
                   {story.title}
                 </h4>
                 <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                  <span>{getTimeAgo(story.created_at)}</span>
+                  <span>{getTimeAgo(story.date)}</span>
                   <div className="flex items-center gap-1">
                     <Eye size={12} />
-                    <span>{story.views.toLocaleString()}</span>
+                    <span>{story.total_views.toLocaleString()}</span>
                   </div>
                 </div>
               </Link>
@@ -124,7 +161,7 @@ export function EntertainmentSection() {
                     >
                       {story.title}
                     </Link>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{getTimeAgo(story.created_at)}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{getTimeAgo(story.date)}</span>
                   </div>
                 </li>
               ))}

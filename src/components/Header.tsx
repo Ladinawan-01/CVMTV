@@ -3,6 +3,14 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getStories } from '../data/stories';
 import { UserAvatar } from './UserAvatar';
+import { apiClient } from '../lib/apiClient';
+
+interface Category {
+  id: number;
+  category_name: string;
+  slug: string;
+  row_order: number;
+}
 
 export function Header() {
   const navigate = useNavigate();
@@ -14,6 +22,7 @@ export function Header() {
     return saved ? JSON.parse(saved) : true;
   });
   const [newsHeadlines, setNewsHeadlines] = useState<Array<{ title: string; slug: string }>>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     if (darkMode) {
@@ -34,6 +43,30 @@ export function Header() {
     };
 
     fetchHeadlines();
+  }, []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await apiClient.getCategories({
+          language_id: 1,
+          offset: 0,
+          limit: 15,
+        });
+
+        if (response.success && response.data?.data) {
+          // Sort by row_order
+          const sortedCategories = response.data.data.sort((a: Category, b: Category) => 
+            a.row_order - b.row_order
+          );
+          setCategories(sortedCategories);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
@@ -104,21 +137,15 @@ export function Header() {
             <Link to="/live" className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors">
               CVM LIVE
             </Link>
-            <Link to="/category/sports" className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors">
-              SPORTS
-            </Link>
-            <Link to="/category/business" className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors">
-              BUSINESS NEWS
-            </Link>
-            <Link to="/category/politics" className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors">
-              POLITICS
-            </Link>
-            <Link to="/category/news" className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors">
-              NEWS
-            </Link>
-            <Link to="/category/entertainment" className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors">
-              ENTERTAINMENT
-            </Link>
+            {categories.map((category) => (
+              <Link
+                key={category.id}
+                to={`/category/${category.slug}`}
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors"
+              >
+                {category.category_name.toUpperCase()}
+              </Link>
+            ))}
           </nav>
 
           <form onSubmit={handleSearch} className="flex items-center gap-2 flex-shrink-0 flex-1 sm:flex-initial justify-end">
@@ -157,21 +184,16 @@ export function Header() {
             <Link to="/live" onClick={() => setMobileMenuOpen(false)} className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 py-2">
               CVM LIVE
             </Link>
-            <Link to="/category/sports" onClick={() => setMobileMenuOpen(false)} className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 py-2">
-              SPORTS
-            </Link>
-            <Link to="/category/business" onClick={() => setMobileMenuOpen(false)} className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 py-2">
-              BUSINESS NEWS
-            </Link>
-            <Link to="/category/politics" onClick={() => setMobileMenuOpen(false)} className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 py-2">
-              POLITICS
-            </Link>
-            <Link to="/category/news" onClick={() => setMobileMenuOpen(false)} className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 py-2">
-              NEWS
-            </Link>
-            <Link to="/category/entertainment" onClick={() => setMobileMenuOpen(false)} className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 py-2">
-              ENTERTAINMENT
-            </Link>
+            {categories.map((category) => (
+              <Link
+                key={category.id}
+                to={`/category/${category.slug}`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 py-2"
+              >
+                {category.category_name.toUpperCase()}
+              </Link>
+            ))}
           </nav>
         </div>
       )}
