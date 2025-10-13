@@ -4,6 +4,7 @@ import { Eye } from 'lucide-react';
 import { FavoriteButton } from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../lib/apiClient';
+import { SectionGridSkeleton } from './Skeleton';
 
 interface Story {
   id: number;
@@ -18,10 +19,12 @@ interface Story {
 export function NewsGrid() {
   const { setShowLoginModal } = useAuth();
   const [storiesByCategory, setStoriesByCategory] = useState<Record<string, Story[]>>({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStories = async () => {
       try {
+        setLoading(true);
         const response = await apiClient.getFeaturedSections({
           language_id: 1,
           offset: 0,
@@ -55,6 +58,8 @@ export function NewsGrid() {
         }
       } catch (error) {
         console.error('Error fetching news grid:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -85,6 +90,20 @@ export function NewsGrid() {
     color: 'text-blue-600 dark:text-blue-400',
     borderColor: 'border-blue-600 dark:border-blue-400'
   }));
+
+  if (loading) {
+    return (
+      <section className="bg-gray-50 dark:bg-gray-900 py-8 sm:py-12 transition-colors overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 w-full">
+            {[1, 2, 3].map((i) => (
+              <SectionGridSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900 py-8 sm:py-12 transition-colors overflow-hidden">

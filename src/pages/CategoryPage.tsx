@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, Eye } from 'lucide-react';
 import { apiClient } from '../lib/apiClient';
+import { CategoryPageSkeleton } from '../components/Skeleton';
 
 interface NewsItem {
   id: number;
@@ -111,9 +112,13 @@ export function CategoryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center text-gray-600 dark:text-gray-400">Loading...</div>
+      <div className="min-h-screen bg-white dark:bg-gray-900 py-6 sm:py-12 transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="mb-6 sm:mb-8">
+            <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-2 animate-pulse" />
+            <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-32 animate-pulse" />
+          </div>
+          <CategoryPageSkeleton />
         </div>
       </div>
     );

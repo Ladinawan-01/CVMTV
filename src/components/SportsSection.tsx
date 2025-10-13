@@ -4,6 +4,7 @@ import { Eye } from 'lucide-react';
 import { FavoriteButton } from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../lib/apiClient';
+import { MainStorySkeleton, SmallCardSkeleton } from './Skeleton';
 
 interface Story {
   id: number;
@@ -20,10 +21,12 @@ export function SportsSection() {
   const { setShowLoginModal } = useAuth();
   const [mainStory, setMainStory] = useState<Story | null>(null);
   const [sideStories, setSideStories] = useState<Story[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSportsStories = async () => {
       try {
+        setLoading(true);
         const response = await apiClient.getFeaturedSections({
           language_id: 1,
           offset: 0,
@@ -54,6 +57,8 @@ export function SportsSection() {
         }
       } catch (error) {
         console.error('Error fetching sports stories:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -76,6 +81,26 @@ export function SportsSection() {
       return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
     }
   };
+
+  if (loading) {
+    return (
+      <section className="bg-green-50 dark:bg-green-950 py-8 sm:py-12 transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-6 animate-pulse" />
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              <MainStorySkeleton />
+            </div>
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <SmallCardSkeleton key={i} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (!mainStory) return null;
 

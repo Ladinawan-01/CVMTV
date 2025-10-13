@@ -4,6 +4,7 @@ import { Eye } from 'lucide-react';
 import { FavoriteButton } from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../lib/apiClient';
+import { MainStorySkeleton, SmallCardSkeleton } from './Skeleton';
 
 interface Story {
   id: number;
@@ -20,10 +21,12 @@ export function BusinessSection() {
   const { setShowLoginModal } = useAuth();
   const [mainStory, setMainStory] = useState<Story | null>(null);
   const [sideStories, setSideStories] = useState<Story[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBusinessStories = async () => {
       try {
+        setLoading(true);
         const response = await apiClient.getFeaturedSections({
           language_id: 1,
           offset: 0,
@@ -54,6 +57,8 @@ export function BusinessSection() {
         }
       } catch (error) {
         console.error('Error fetching business stories:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -78,6 +83,26 @@ export function BusinessSection() {
     if (diffInDays === 1) return '1 day ago';
     return `${diffInDays} days ago`;
   };
+
+  if (loading) {
+    return (
+      <section className="bg-white dark:bg-gray-900 py-8 sm:py-12 transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-6 animate-pulse" />
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              <MainStorySkeleton />
+            </div>
+            <div className="space-y-6">
+              <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              <SmallCardSkeleton />
+              <SmallCardSkeleton />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   if (!mainStory) return null;
 

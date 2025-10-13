@@ -4,6 +4,7 @@ import { Eye } from 'lucide-react';
 import { FavoriteButton } from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../lib/apiClient';
+import { FeaturedStorySkeleton, TrendingStorySkeleton } from './Skeleton';
 
 interface Story {
   id: number;
@@ -21,10 +22,12 @@ export function FeaturedSection() {
   const [latestStories, setLatestStories] = useState<Story[]>([]);
   const [trendingStories, setTrendingStories] = useState<Story[]>([]);
   const [adBanner, setAdBanner] = useState<string>('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStories = async () => {
       try {
+        setLoading(true);
         const response = await apiClient.getFeaturedSections({
           language_id: 1,
           offset: 0,
@@ -61,6 +64,8 @@ export function FeaturedSection() {
         }
       } catch (error) {
         console.error('Error fetching featured stories:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -89,6 +94,36 @@ export function FeaturedSection() {
     tmp.innerHTML = html;
     return tmp.textContent || tmp.innerText || '';
   };
+
+  if (loading) {
+    return (
+      <section className="bg-white dark:bg-gray-950 py-8 sm:py-12 border-t border-gray-200 dark:border-gray-800 transition-colors overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
+          <div className="mb-6 sm:mb-8 flex justify-center">
+            <div className="w-full max-w-3xl h-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          </div>
+          <div className="grid lg:grid-cols-3 gap-6 sm:gap-8 w-full">
+            <div className="lg:col-span-2">
+              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-6 animate-pulse" />
+              <div className="space-y-6">
+                {[1, 2, 3, 4].map((i) => (
+                  <FeaturedStorySkeleton key={i} />
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-6 animate-pulse" />
+              <div className="space-y-4">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <TrendingStorySkeleton key={i} index={i - 1} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="bg-white dark:bg-gray-950 py-8 sm:py-12 border-t border-gray-200 dark:border-gray-800 transition-colors overflow-hidden">

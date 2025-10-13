@@ -446,6 +446,23 @@ class CVMApiClient {
     return this.get(`/get_news?${queryParams.toString()}`);
   }
 
+  /**
+   * Get news by slug (for detail page)
+   * GET /get_news
+   */
+  async getNewsBySlug(params: {
+    slug: string;
+    language_id?: number;
+  }): Promise<ApiResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('slug', params.slug);
+    queryParams.append('language_id', (params?.language_id || 1).toString());
+    queryParams.append('offset', '0');
+    queryParams.append('limit', '1');
+
+    return this.get(`/get_news?${queryParams.toString()}`);
+  }
+
   // ============================================
   // User Profile APIs
   // ============================================
