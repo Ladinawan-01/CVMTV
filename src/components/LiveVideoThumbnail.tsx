@@ -32,7 +32,7 @@ export function LiveVideoThumbnail({ onVisibilityChange }: LiveVideoThumbnailPro
 
   return (
     <div ref={containerRef} className="relative group cursor-pointer flex gap-4 pb-4 border-b border-gray-200 dark:border-gray-800">
-      <Link to="/live" className="contents">
+      <Link to="https://now.cvmtv.com/" className="contents">
         <div className="relative w-48 h-32 flex-shrink-0 bg-black overflow-hidden">
           <img
             src="https://images.pexels.com/photos/3765132/pexels-photo-3765132.jpeg?auto=compress&cs=tinysrgb&w=600"
