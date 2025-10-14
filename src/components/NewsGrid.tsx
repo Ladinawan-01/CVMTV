@@ -25,37 +25,39 @@ export function NewsGrid() {
     const fetchStories = async () => {
       try {
         setLoading(true);
-        const response = await apiClient.getFeaturedSections({
-          language_id: 1,
-          offset: 0,
-          limit: 9,
-        });
+        
+        // Fetch different category sections
+        const categorySlugs = ['news', 'politics-jamaica', 'business-news'];
+        const results: Record<string, Story[]> = {};
 
-        if (response.success && response.data?.data) {
-          const results: Record<string, Story[]> = {};
-          
-          // Map sections to categories
-          const sections = response.data.data;
-          
-          sections.forEach((section: any) => {
-            if (section.news && section.news.length > 0) {
-              const stories = section.news.slice(0, 6).map((news: any) => ({
+        await Promise.all(
+          categorySlugs.map(async (slug) => {
+            const response = await apiClient.getNewsByCategory({
+              category_slug: slug,
+              language_id: 1,
+              offset: 0,
+              limit: 6,
+            });
+
+            if (response.success && response.data?.data) {
+              const stories = response.data.data.map((news: any) => ({
                 id: news.id,
                 title: news.title,
                 slug: news.slug,
                 image: news.image,
-                category_name: news.category_name,
+                category_name: news.category?.category_name || 'News',
                 date: news.date,
                 total_views: news.total_views || 0,
               }));
-              
-              // Use section title as category name
-              results[section.title] = stories;
-            }
-          });
 
-          setStoriesByCategory(results);
-        }
+              // Use category name as key
+              const categoryName = stories[0]?.category_name || slug;
+              results[categoryName] = stories;
+            }
+          })
+        );
+
+        setStoriesByCategory(results);
       } catch (error) {
         console.error('Error fetching news grid:', error);
       } finally {

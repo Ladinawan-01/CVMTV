@@ -463,6 +463,25 @@ class CVMApiClient {
     return this.get(`/get_news?${queryParams.toString()}`);
   }
 
+  /**
+   * Get breaking news
+   * GET /get_breaking_news
+   */
+  async getBreakingNews(params?: {
+    language_id?: number;
+    slug?: string;
+    offset?: number;
+    limit?: number;
+  }): Promise<ApiResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('language_id', (params?.language_id || 1).toString());
+    queryParams.append('slug', params?.slug || '');
+    queryParams.append('offset', (params?.offset || 0).toString());
+    queryParams.append('limit', (params?.limit || 10).toString());
+
+    return this.get(`/get_breaking_news?${queryParams.toString()}`);
+  }
+
   // ============================================
   // User Profile APIs
   // ============================================

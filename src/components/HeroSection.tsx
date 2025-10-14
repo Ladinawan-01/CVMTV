@@ -1,10 +1,98 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { LiveVideoThumbnail } from './LiveVideoThumbnail';
 import { FavoriteButton } from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
+import { apiClient } from '../lib/apiClient';
+
+interface BreakingNews {
+  id: number;
+  title: string;
+  slug: string;
+  image: string;
+  description: string;
+  date: string;
+  total_views: number;
+}
+
+interface HeadlineNews {
+  id: number;
+  title: string;
+  slug: string;
+  date: string;
+}
 
 export function HeroSection() {
   const { setShowLoginModal } = useAuth();
+  const [breakingNews, setBreakingNews] = useState<BreakingNews[]>([]);
+  const [headlineNews, setHeadlineNews] = useState<HeadlineNews[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHeroData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch breaking news
+        const breakingResponse = await apiClient.getBreakingNews({
+          language_id: 1,
+          offset: 0,
+          limit: 4,
+        });
+
+        if (breakingResponse.success && breakingResponse.data?.data) {
+          setBreakingNews(breakingResponse.data.data);
+        }
+
+        // Fetch headline news
+        const headlineResponse = await apiClient.getNewsByCategory({
+          category_slug: 'news',
+          language_id: 1,
+          offset: 0,
+          limit: 8,
+        });
+
+        if (headlineResponse.success && headlineResponse.data?.data) {
+          const headlines = headlineResponse.data.data.map((news: any) => ({
+            id: news.id,
+            title: news.title,
+            slug: news.slug,
+            date: news.date,
+          }));
+          setHeadlineNews(headlines);
+        }
+      } catch (error) {
+        console.error('Error fetching hero section data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHeroData();
+  }, []);
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+
+    if (diffInHours < 1) {
+      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+      return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+    } else {
+      const diffInDays = Math.floor(diffInHours / 24);
+      return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+    }
+  };
+
+  const stripHtml = (html: string) => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  };
 
   return (
     <section className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 transition-colors overflow-hidden">
@@ -25,15 +113,17 @@ export function HeroSection() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 w-full overflow-hidden">
-          <Link to="/story/breakthrough-medical-research-announced" className="relative group cursor-pointer block w-full">
+          {/* Main Breaking News */}
+          {!loading && breakingNews[0] ? (
+            <Link to={`/story/${breakingNews[0].slug}`} className="relative group cursor-pointer block w-full">
             <div className="relative h-[300px] sm:h-[350px] lg:h-[500px] bg-gray-900 overflow-hidden rounded-lg w-full">
               <FavoriteButton
-                storyId="breakthrough-medical-research-announced"
+                  storyId={breakingNews[0].slug}
                 onLoginRequired={() => setShowLoginModal(true)}
               />
               <img
-                src="https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=1200"
-                alt="Breaking news"
+                  src={breakingNews[0].image}
+                  alt={breakingNews[0].title}
                 className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
@@ -44,81 +134,51 @@ export function HeroSection() {
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white">
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-3 leading-tight">
-                  Breakthrough Medical Research Offers Hope for Disease Treatment
+                    {breakingNews[0].title}
                 </h2>
-                <p className="text-gray-200 text-xs sm:text-sm mb-2 hidden sm:block">
-                  Scientists announce major breakthrough in medical research that could revolutionize treatment options
-                </p>
-                <span className="text-xs text-gray-300">2 hours ago</span>
+                  <p className="text-gray-200 text-xs sm:text-sm mb-2 hidden sm:block line-clamp-2">
+                    {stripHtml(breakingNews[0].description)}
+                  </p>
+                  <span className="text-xs text-gray-300">{formatTimeAgo(breakingNews[0].date)}</span>
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          ) : (
+            loading && (
+              <div className="relative h-[300px] sm:h-[350px] lg:h-[500px] bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-full" />
+            )
+          )}
 
+          {/* Side Breaking News */}
           <div className="space-y-4 w-full min-w-0">
-            <Link to="/story/landmark-legislation-passes-parliament" className="relative group cursor-pointer block w-full">
+            {!loading && breakingNews.slice(1, 4).map((news) => (
+              <Link key={news.slug} to={`/story/${news.slug}`} className="relative group cursor-pointer block w-full">
               <div className="relative h-[155px] bg-gray-900 overflow-hidden rounded-lg w-full">
                 <FavoriteButton
-                  storyId="landmark-legislation-passes-parliament"
+                    storyId={news.slug}
                   onLoginRequired={() => setShowLoginModal(true)}
                 />
                 <img
-                  src="https://images.pexels.com/photos/3183197/pexels-photo-3183197.jpeg?auto=compress&cs=tinysrgb&w=600"
-                  alt="Parliament"
+                    src={news.image}
+                    alt={news.title}
                   className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                  <h3 className="text-sm sm:text-base font-bold mb-1 leading-tight">
-                    Landmark Legislation Passes Parliament After Months of Debate
+                    <h3 className="text-sm sm:text-base font-bold mb-1 leading-tight line-clamp-2">
+                      {news.title}
                   </h3>
-                  <span className="text-xs text-gray-300">3 hours ago</span>
+                    <span className="text-xs text-gray-300">{formatTimeAgo(news.date)}</span>
                 </div>
               </div>
             </Link>
-
-            <Link to="/story/tech-giant-artificial-intelligence-breakthrough" className="relative group cursor-pointer block w-full">
-              <div className="relative h-[155px] bg-gray-900 overflow-hidden rounded-lg w-full">
-                <FavoriteButton
-                  storyId="tech-giant-artificial-intelligence-breakthrough"
-                  onLoginRequired={() => setShowLoginModal(true)}
-                />
-                <img
-                  src="https://images.pexels.com/photos/3823488/pexels-photo-3823488.jpeg?auto=compress&cs=tinysrgb&w=600"
-                  alt="Tech investment"
-                  className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                  <h3 className="text-sm sm:text-base font-bold mb-1 leading-tight">
-                    Tech Giant Announces Major Artificial Intelligence Breakthrough
-                  </h3>
-                  <span className="text-xs text-gray-300">4 hours ago</span>
-                </div>
-              </div>
-            </Link>
-
-            <Link to="/story/community-rebuilds-after-natural-disaster" className="relative group cursor-pointer block w-full">
-              <div className="relative h-[155px] bg-gray-900 overflow-hidden rounded-lg w-full">
-                <FavoriteButton
-                  storyId="community-rebuilds-after-natural-disaster"
-                  onLoginRequired={() => setShowLoginModal(true)}
-                />
-                <img
-                  src="https://images.pexels.com/photos/2161467/pexels-photo-2161467.jpeg?auto=compress&cs=tinysrgb&w=600"
-                  alt="Community recovery"
-                  className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                  <h3 className="text-sm sm:text-base font-bold mb-1 leading-tight">
-                    Community Comes Together to Rebuild After Natural Disaster
-                  </h3>
-                  <span className="text-xs text-gray-300">5 hours ago</span>
-                </div>
-              </div>
-            </Link>
+            ))}
+            {loading && [1, 2, 3].map((i) => (
+              <div key={i} className="h-[155px] bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse w-full" />
+            ))}
           </div>
 
+          {/* Headline News Section */}
           <div className="space-y-6 w-full min-w-0">
             <div className="w-full">
               <div className="border-b-2 border-blue-600 dark:border-blue-400 pb-2 mb-4">
@@ -154,102 +214,31 @@ export function HeroSection() {
                 <h2 className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase">Headline News</h2>
               </div>
               <ul className="space-y-3 sm:space-y-4 w-full">
-                <li className="text-gray-900 dark:text-white flex items-start sm:items-center gap-2">
+                {!loading && headlineNews.map((news) => (
+                  <li key={news.id} className="text-gray-900 dark:text-white flex items-start sm:items-center gap-2">
                   <span className="flex-shrink-0 mt-1 sm:mt-0">•</span>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
                     <Link
-                      to="/story/international-summit-diplomatic-progress"
+                        to={`/story/${news.slug}`}
                       className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
                     >
-                      International Summit Yields Diplomatic Progress on Key Issues
+                        {news.title}
                     </Link>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">1 hour ago</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">
+                        {formatTimeAgo(news.date)}
+                      </span>
                   </div>
                 </li>
-                <li className="text-gray-900 dark:text-white flex items-start sm:items-center gap-2">
-                  <span className="flex-shrink-0 mt-1 sm:mt-0">•</span>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                    <Link
-                      to="/story/global-markets-rally-economic-data"
-                      className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
-                    >
-                      Global Markets Rally on Strong Economic Data and Corporate Earnings
-                    </Link>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">2 hours ago</span>
+                ))}
+                {loading && [1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <li key={i} className="flex items-center gap-2">
+                    <span className="flex-shrink-0">•</span>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse" />
+                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-20 animate-pulse" />
                   </div>
                 </li>
-                <li className="text-gray-900 dark:text-white flex items-start sm:items-center gap-2">
-                  <span className="flex-shrink-0 mt-1 sm:mt-0">•</span>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                    <Link
-                      to="/story/renewable-energy-investment-surge"
-                      className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
-                    >
-                      Renewable Energy Investment Reaches Record Levels Globally
-                    </Link>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">3 hours ago</span>
-                  </div>
-                </li>
-                <li className="text-gray-900 dark:text-white flex items-start sm:items-center gap-2">
-                  <span className="flex-shrink-0 mt-1 sm:mt-0">•</span>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                    <Link
-                      to="/story/education-initiative-transforms-schools"
-                      className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
-                    >
-                      Innovative Education Initiative Transforms Schools and Student Outcomes
-                    </Link>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">4 hours ago</span>
-                  </div>
-                </li>
-                <li className="text-gray-900 dark:text-white flex items-start sm:items-center gap-2">
-                  <span className="flex-shrink-0 mt-1 sm:mt-0">•</span>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                    <Link
-                      to="/story/world-cup-final-breaks-records"
-                      className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
-                    >
-                      World Cup Final Breaks All-Time Viewership Records
-                    </Link>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">5 hours ago</span>
-                  </div>
-                </li>
-                <li className="text-gray-900 dark:text-white flex items-start sm:items-center gap-2">
-                  <span className="flex-shrink-0 mt-1 sm:mt-0">•</span>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                    <Link
-                      to="/story/olympic-athlete-breaks-world-record"
-                      className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
-                    >
-                      Olympic Athlete Breaks World Record in Stunning Performance
-                    </Link>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">6 hours ago</span>
-                  </div>
-                </li>
-                <li className="text-gray-900 dark:text-white flex items-start sm:items-center gap-2">
-                  <span className="flex-shrink-0 mt-1 sm:mt-0">•</span>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                    <Link
-                      to="/story/blockbuster-film-shatters-box-office"
-                      className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
-                    >
-                      Blockbuster Film Shatters Box Office Records Worldwide
-                    </Link>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">7 hours ago</span>
-                  </div>
-                </li>
-                <li className="text-gray-900 dark:text-white flex items-start sm:items-center gap-2">
-                  <span className="flex-shrink-0 mt-1 sm:mt-0">•</span>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                    <Link
-                      to="/story/climate-summit-nations-pledge-action"
-                      className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
-                    >
-                      Climate Summit: Nations Pledge Unprecedented Environmental Action
-                    </Link>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">8 hours ago</span>
-                  </div>
-                </li>
+                ))}
               </ul>
             </div>
           </div>

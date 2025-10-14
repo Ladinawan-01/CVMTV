@@ -27,33 +27,27 @@ export function SportsSection() {
     const fetchSportsStories = async () => {
       try {
         setLoading(true);
-        const response = await apiClient.getFeaturedSections({
+        const response = await apiClient.getNewsByCategory({
+          category_slug: 'sports',
           language_id: 1,
           offset: 0,
-          limit: 9,
+          limit: 7,
         });
 
         if (response.success && response.data?.data) {
-          // Find Sports section
-          const section = response.data.data.find((s: any) => 
-            s.title.toLowerCase().includes('sports') || s.slug === 'sports-news'
-          ) || response.data.data[3]; // Use 4th section as fallback
+          const stories = response.data.data.map((news: any) => ({
+            id: news.id,
+            title: news.title,
+            slug: news.slug,
+            image: news.image,
+            category_name: news.category?.category_name || 'Sports',
+            description: news.description,
+            date: news.date,
+            total_views: news.total_views || 0,
+          }));
 
-          if (section && section.news && section.news.length > 0) {
-            const stories = section.news.slice(0, 7).map((news: any) => ({
-              id: news.id,
-              title: news.title,
-              slug: news.slug,
-              image: news.image,
-              category_name: news.category_name,
-              description: news.description,
-              date: news.date,
-              total_views: news.total_views || 0,
-            }));
-
-            setMainStory(stories[0]);
-            setSideStories(stories.slice(1));
-          }
+          setMainStory(stories[0]);
+          setSideStories(stories.slice(1));
         }
       } catch (error) {
         console.error('Error fetching sports stories:', error);

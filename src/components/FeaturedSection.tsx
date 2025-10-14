@@ -35,13 +35,12 @@ export function FeaturedSection() {
         });
 
         if (response.success && response.data?.data) {
-          // Find the "Lead Stories" or first section
+          // Find "Lead Stories" section or use first section
           const leadSection = response.data.data.find((s: any) => 
             s.slug === 'lead-stories' || s.title.toLowerCase().includes('lead')
           ) || response.data.data[0];
 
           if (leadSection && leadSection.news) {
-            // Map API data to Story format
             const stories = leadSection.news.map((news: any) => ({
               id: news.id,
               title: news.title,
