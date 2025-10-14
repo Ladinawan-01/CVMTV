@@ -29,20 +29,11 @@ interface StoryDetail {
   }>;
 }
 
-interface AdSpace {
-  id: number;
-  ad_space: string;
-  web_ad_image: string;
-  ad_image: string;
-  ad_url: string;
-}
-
 export function StoryPage() {
   const { slug } = useParams<{ slug: string }>();
   const { setShowLoginModal } = useAuth();
   const [story, setStory] = useState<StoryDetail | null>(null);
   const [relatedStories, setRelatedStories] = useState<StoryDetail[]>([]);
-  const [adSpaces, setAdSpaces] = useState<AdSpace[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -62,7 +53,6 @@ export function StoryPage() {
         if (response.success && response.data?.data && response.data.data.length > 0) {
           const articleData = response.data.data[0];
           setStory(articleData);
-          setAdSpaces(response.data.ad_spaces || []);
 
           // Fetch related articles from same category
           if (articleData.category) {
@@ -125,28 +115,13 @@ export function StoryPage() {
     });
   };
 
-  // Get ad spaces by position
-  const getAdByPosition = (position: string) => {
-    return adSpaces.find(ad => ad.ad_space === position);
-  };
-
-  const topAd = getAdByPosition('news_details_top');
-  const leftAd = getAdByPosition('news_details_left');
-  const rightAd = getAdByPosition('news_details_right');
-  const bottomAd = getAdByPosition('news_details_bottom');
-
   return (
     <article className="bg-white dark:bg-gray-950 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Top Ad */}
-        {topAd && (
-          <div className="mb-6 flex justify-center">
-            <a href={topAd.ad_url} target="_blank" rel="noopener noreferrer">
-              <img src={topAd.web_ad_image || topAd.ad_image} alt="Advertisement" className="max-w-full h-auto" />
-            </a>
-          </div>
-        )}
 
+        
+
+        <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
           <Link
             to="/"
@@ -163,19 +138,7 @@ export function StoryPage() {
             <span className="font-semibold">Back to {story.category.category_name}</span>
           </Link>
         </div>
-
-        <div className="grid lg:grid-cols-12 gap-8">
-          {/* Left Ad */}
-          {leftAd && (
-            <div className="hidden lg:block lg:col-span-2">
-              <a href={leftAd.ad_url} target="_blank" rel="noopener noreferrer" className="sticky top-24">
-                <img src={leftAd.web_ad_image || leftAd.ad_image} alt="Advertisement" className="w-full" />
-              </a>
-            </div>
-          )}
-
           {/* Main Content */}
-          <div className={leftAd && rightAd ? "lg:col-span-8" : leftAd || rightAd ? "lg:col-span-10" : "lg:col-span-12"}>
             <div className="mb-6">
               <span className="inline-block bg-blue-600 dark:bg-blue-700 text-white px-3 py-1 text-sm font-bold uppercase mb-4">
                 {story.category.category_name}
@@ -260,25 +223,6 @@ export function StoryPage() {
               </div>
             )}
           </div>
-
-          {/* Right Ad */}
-          {rightAd && (
-            <div className="hidden lg:block lg:col-span-2">
-              <a href={rightAd.ad_url} target="_blank" rel="noopener noreferrer" className="sticky top-24">
-                <img src={rightAd.web_ad_image || rightAd.ad_image} alt="Advertisement" className="w-full" />
-              </a>
-            </div>
-          )}
-        </div>
-
-        {/* Bottom Ad */}
-        {bottomAd && (
-          <div className="mt-8 flex justify-center">
-            <a href={bottomAd.ad_url} target="_blank" rel="noopener noreferrer">
-              <img src={bottomAd.web_ad_image || bottomAd.ad_image} alt="Advertisement" className="max-w-full h-auto" />
-            </a>
-          </div>
-        )}
       </div>
     </article>
   );

@@ -138,25 +138,14 @@ export function StoryDetailSkeleton() {
   return (
     <article className="bg-white dark:bg-gray-950 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Top Ad Skeleton */}
-        <div className="mb-6 flex justify-center">
-          <SkeletonImage className="w-full max-w-3xl h-24" />
-        </div>
-
         {/* Breadcrumb Skeleton */}
         <div className="flex items-center gap-4 mb-6">
           <SkeletonText className="h-5 w-20" />
           <SkeletonText className="h-5 w-32" />
         </div>
 
-        <div className="grid lg:grid-cols-12 gap-8">
-          {/* Left Ad Skeleton */}
-          <div className="hidden lg:block lg:col-span-2">
-            <SkeletonImage className="w-full h-96 sticky top-24" />
-          </div>
-
+        <div className="max-w-4xl mx-auto">
           {/* Main Content Skeleton */}
-          <div className="lg:col-span-8">
             {/* Category Badge */}
             <SkeletonText className="h-6 w-24 mb-4" />
             
@@ -201,17 +190,6 @@ export function StoryDetailSkeleton() {
               </div>
             </div>
           </div>
-
-          {/* Right Ad Skeleton */}
-          <div className="hidden lg:block lg:col-span-2">
-            <SkeletonImage className="w-full h-96 sticky top-24" />
-          </div>
-        </div>
-
-        {/* Bottom Ad Skeleton */}
-        <div className="mt-8 flex justify-center">
-          <SkeletonImage className="w-full max-w-3xl h-24" />
-        </div>
       </div>
     </article>
   );
