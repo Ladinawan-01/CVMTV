@@ -15,6 +15,20 @@ interface BreakingNews {
   id: number;
   title: string;
   slug: string;
+  image?: string;
+  date?: string;
+  description?: string;
+}
+
+interface NewsApiItem {
+  id: number;
+  title: string;
+  slug: string;
+  image: string;
+  date: string;
+  description: string;
+  total_views: number;
+  is_headline: boolean;
 }
 
 export function Header() {
@@ -49,7 +63,7 @@ export function Header() {
         });
 
         if (response.success && response.data?.data) {
-          const headlines = response.data.data.map((news: any) => ({
+          const headlines = response.data.data.map((news: NewsApiItem) => ({
             id: news.id,
             title: news.title,
             slug: news.slug,

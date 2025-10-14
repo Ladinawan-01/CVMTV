@@ -1,18 +1,50 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Home, Radio, TrendingUp, Briefcase, Landmark, Newspaper, Film } from 'lucide-react';
+import { Menu, X, Home, Radio, Newspaper } from 'lucide-react';
+import { apiClient } from '../lib/apiClient';
+
+interface Category {
+  id: number;
+  category_name: string;
+  slug: string;
+  row_order: number;
+}
 
 export function QuickActionsMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const menuItems = [
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        const response = await apiClient.getCategories({
+          language_id: 1,
+          offset: 0,
+          limit: 15,
+        });
+
+        if (response.success && response.data?.data) {
+          // Sort by row_order
+          const sortedCategories = response.data.data.sort((a: Category, b: Category) => 
+            a.row_order - b.row_order
+          );
+          setCategories(sortedCategories);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const staticMenuItems = [
     { icon: Home, label: 'Home', path: '/' },
-    { icon: Radio, label: 'CVM Live', path: '/live' },
-    { icon: TrendingUp, label: 'Sports', path: '/category/sports' },
-    { icon: Briefcase, label: 'Business News', path: '/category/business' },
-    { icon: Landmark, label: 'Politics', path: '/category/politics' },
-    { icon: Newspaper, label: 'News', path: '/category/news' },
-    { icon: Film, label: 'Entertainment', path: '/category/entertainment' },
+    { icon: Radio, label: 'CVM Live', path: 'https://now.cvmtv.com/' }
   ];
 
   return (
@@ -34,12 +66,13 @@ export function QuickActionsMenu() {
             onClick={() => setIsOpen(false)}
           />
 
-          <div className="fixed bottom-20 right-4 sm:bottom-24 sm:right-6 z-50 bg-white dark:bg-gray-900 rounded-lg shadow-xl overflow-hidden w-56 sm:w-64 animate-in slide-in-from-bottom-4">
-            <div className="p-2.5 sm:p-3 bg-green-600 text-white font-semibold text-sm sm:text-base">
+          <div className="fixed bottom-20 right-4 sm:bottom-24 sm:right-6 z-50 bg-white dark:bg-gray-900 rounded-lg shadow-xl overflow-hidden w-56 sm:w-64 animate-in slide-in-from-bottom-4 max-h-[80vh] overflow-y-auto">
+            <div className="p-2.5 sm:p-3 bg-green-600 text-white font-semibold text-sm sm:text-base sticky top-0 z-10">
               Quick Actions
             </div>
             <nav className="py-2">
-              {menuItems.map((item) => {
+              {/* Static Menu Items */}
+              {staticMenuItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <Link
@@ -53,6 +86,36 @@ export function QuickActionsMenu() {
                   </Link>
                 );
               })}
+
+              {/* Divider */}
+              {!loading && categories.length > 0 && (
+                <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
+              )}
+
+              {/* Dynamic Category Items from API */}
+              {loading ? (
+                // Loading skeleton
+                <div className="px-3 py-2">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="flex items-center gap-3 py-2.5">
+                      <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                      <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                categories.map((category) => (
+                  <Link
+                    key={category.id}
+                    to={`/category/${category.slug}`}
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 px-3 py-2.5 sm:px-4 sm:py-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <Newspaper size={18} className="sm:w-5 sm:h-5 text-green-600 flex-shrink-0" />
+                    <span className="text-sm sm:text-base text-gray-900 dark:text-white">{category.category_name}</span>
+                  </Link>
+                ))
+              )}
             </nav>
           </div>
         </>

@@ -73,6 +73,7 @@ export function HeroSection() {
               slug: news.slug,
               date: news.date,
               is_headline: news.is_headline,
+              created_at: news.created_at,
             }));
 
           // Also add breaking news items with is_headline=true
@@ -83,6 +84,7 @@ export function HeroSection() {
               title: news.title,
               slug: news.slug,
               date: news.date,
+              created_at: news.created_at,
               is_headline: news.is_headline,
             }));
 
@@ -119,6 +121,35 @@ export function HeroSection() {
     } else {
       const diffInDays = Math.floor(diffInHours / 24);
       return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+    }
+  };
+  const formatHandlineTimeAgo = (dateString: string) => {
+    console.log(dateString,'dateString')
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+
+    if (diffInHours < 1) {
+      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+      return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+    } else if (diffInHours < 24 * 7) {
+      const diffInDays = Math.floor(diffInHours / 24);
+      return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+    } else if (diffInHours < 24 * 30) {
+      const diffInWeeks = Math.floor(diffInHours / (24 * 7));
+      return `${diffInWeeks} week${diffInWeeks !== 1 ? 's' : ''} ago`;
+    } else if (diffInHours < 24 * 365) {
+      const diffInMonths = Math.floor(diffInHours / (24 * 30));
+      return `${diffInMonths} month${diffInMonths !== 1 ? 's' : ''} ago`;
+    } else {
+      const diffInYears = Math.floor(diffInHours / (24 * 365));
+      if (isNaN(diffInYears)) {
+        return 'NaN years ago';
+      }
+      return `${diffInYears} year${diffInYears !== 1 ? 's' : ''} ago`;
     }
   };
 
@@ -173,7 +204,7 @@ export function HeroSection() {
                   <p className="text-gray-200 text-xs sm:text-sm mb-2 hidden sm:block line-clamp-2">
                     {stripHtml(breakingNews[0].description)}
                   </p>
-                  <span className="text-xs text-gray-300">{formatTimeAgo(breakingNews[0].date)}</span>
+                  <span className="text-xs text-gray-300">{formatTimeAgo(breakingNews[0].created_at)}</span>
                 </div>
               </div>
             </Link>
@@ -202,7 +233,7 @@ export function HeroSection() {
                     <h3 className="text-sm sm:text-base font-bold mb-1 leading-tight line-clamp-2">
                       {news.title}
                   </h3>
-                    <span className="text-xs text-gray-300">{formatTimeAgo(news.date)}</span>
+                    <span className="text-xs text-gray-300">{formatTimeAgo(news.created_at)}</span>
                 </div>
               </div>
             </Link>
@@ -261,7 +292,7 @@ export function HeroSection() {
                         {news.title}
                     </Link>
                       <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">
-                        {formatTimeAgo(news.date)}
+                        {formatHandlineTimeAgo(news.created_at)}
                       </span>
                   </div>
                 </li>
