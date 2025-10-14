@@ -445,6 +445,20 @@ class CVMApiClient {
 
     return this.get(`/get_news?${queryParams.toString()}`);
   }
+  async getHeadlineCategory(params: {
+    category_slug: string;
+    language_id?: number;
+    offset?: number;
+    limit?: number;
+  }): Promise<ApiResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('category_slug', params.category_slug);
+    queryParams.append('language_id', (params?.language_id || 1).toString());
+    queryParams.append('offset', (params?.offset || 0).toString());
+    queryParams.append('limit', (params?.limit || 20).toString());
+
+    return this.get(`/get_news?${queryParams.toString()}&is_headline=1`);
+  }
 
   /**
    * Get news by slug (for detail page)
@@ -459,8 +473,7 @@ class CVMApiClient {
     queryParams.append('language_id', (params?.language_id || 1).toString());
     queryParams.append('offset', '0');
     queryParams.append('limit', '1');
-
-    return this.get(`/get_news?${queryParams.toString()}`);
+     return this.get(`/get_news?${queryParams.toString()}`);
   }
 
   /**
@@ -478,8 +491,24 @@ class CVMApiClient {
     queryParams.append('slug', params?.slug || '');
     queryParams.append('offset', (params?.offset || 0).toString());
     queryParams.append('limit', (params?.limit || 10).toString());
+    queryParams.append('is_headline', '1');
 
     return this.get(`/get_breaking_news?${queryParams.toString()}`);
+  }
+  async getBreakingNewsHeadlines(params?: {
+    language_id?: number;
+    slug?: string;
+    offset?: number;
+    limit?: number;
+  }): Promise<ApiResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('language_id', (params?.language_id || 1).toString());
+    queryParams.append('slug', params?.slug || '');
+    queryParams.append('offset', (params?.offset || 0).toString());
+    queryParams.append('limit', (params?.limit || 10).toString());
+    queryParams.append('is_headline', '1');
+
+    return this.get(`/get_breaking_news?${queryParams.toString()}&is_headline=1`);
   }
 
   /**

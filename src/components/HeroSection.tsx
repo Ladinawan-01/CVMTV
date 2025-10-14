@@ -13,9 +13,18 @@ interface BreakingNews {
   description: string;
   date: string;
   total_views: number;
+  is_headline: boolean;
 }
 
 interface HeadlineNews {
+  id: number;
+  title: string;
+  slug: string;
+  date: string;
+  is_headline: boolean;
+}
+
+interface NewsItem {
   id: number;
   title: string;
   slug: string;
@@ -41,32 +50,50 @@ export function HeroSection() {
           limit: 4,
         });
 
+        let fetchedBreakingNews: BreakingNews[] = [];
         if (breakingResponse.success && breakingResponse.data?.data) {
-          setBreakingNews(breakingResponse.data.data);
+          fetchedBreakingNews = breakingResponse.data.data;
+          setBreakingNews(fetchedBreakingNews);
         }
 
-        // Fetch headline news (only articles with is_headline: true)
-        const headlineResponse = await apiClient.getNewsByCategory({
-          category_slug: 'news',
+        // Fetch headline news using getHeadlineCategory
+        const headlineResponse = await apiClient.getBreakingNewsHeadlines({
           language_id: 1,
           offset: 0,
-          limit: 20, // Fetch more to ensure we get enough headlines
+          limit: 20,
         });
 
         if (headlineResponse.success && headlineResponse.data?.data) {
           // Filter only articles where is_headline is true
-          const headlines = headlineResponse.data.data
-            .filter((news: any) => news.is_headline === true)
-            .map((news: any) => ({
+          const newsHeadlines = headlineResponse.data.data
+            .filter((news: NewsItem) => news.is_headline === true)
+            .map((news: NewsItem) => ({
               id: news.id,
               title: news.title,
               slug: news.slug,
               date: news.date,
               is_headline: news.is_headline,
-            }))
-            .slice(0, 8); // Take only first 8 headlines
+            }));
+
+          // Also add breaking news items with is_headline=true
+          const breakingHeadlines = fetchedBreakingNews
+            .filter((news) => news.is_headline === true)
+            .map((news) => ({
+              id: news.id,
+              title: news.title,
+              slug: news.slug,
+              date: news.date,
+              is_headline: news.is_headline,
+            }));
+
+          // Combine and deduplicate, then take first 8
+          const allHeadlines = [...breakingHeadlines, ...newsHeadlines];
+          const uniqueHeadlines = allHeadlines.filter(
+            (headline, index, self) =>
+              index === self.findIndex((h) => h.id === headline.id)
+          ).slice(0, 8);
           
-          setHeadlineNews(headlines);
+          setHeadlineNews(uniqueHeadlines);
         }
       } catch (error) {
         console.error('Error fetching hero section data:', error);
@@ -219,7 +246,7 @@ export function HeroSection() {
             <div className="w-full">
               {headlineNews.length > 0 && (
               <div className="border-b-2 border-blue-600 dark:border-blue-400 pb-2 mb-4">
-                <h2 className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase">Headline News</h2>
+                <h2 className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase">Headline BREAKING NEWS</h2>
               </div>
               )}
               <ul className="space-y-3 sm:space-y-4 w-full">

@@ -18,25 +18,42 @@ interface Story {
   is_headline: boolean;
 }
 
+interface NewsItem {
+  id: number;
+  title: string;
+  slug: string;
+  image: string;
+  description: string;
+  date: string;
+  total_views: number;
+  is_headline: boolean;
+  category?: {
+    category_name: string;
+  };
+}
+
 export function SportsSection() {
   const { setShowLoginModal } = useAuth();
   const [mainStory, setMainStory] = useState<Story | null>(null);
   const [sideStories, setSideStories] = useState<Story[]>([]);
+  const [headlineStories, setHeadlineStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSportsStories = async () => {
       try {
         setLoading(true);
+        
+        // Fetch regular sports news
         const response = await apiClient.getNewsByCategory({
           category_slug: 'sports',
           language_id: 1,
           offset: 0,
-          limit: 7,
+          limit: 4,
         });
 
         if (response.success && response.data?.data) {
-          const stories = response.data.data.map((news: any) => ({
+          const stories = response.data.data.map((news: NewsItem) => ({
             id: news.id,
             title: news.title,
             slug: news.slug,
@@ -49,7 +66,33 @@ export function SportsSection() {
           }));
 
           setMainStory(stories[0]);
-          setSideStories(stories.slice(1));
+          setSideStories(stories.slice(1, 4));
+        }
+
+        // Fetch headline sports news
+        const headlineResponse = await apiClient.getHeadlineCategory({
+          category_slug: 'sports',
+          language_id: 1,
+          offset: 0,
+          limit: 10,
+        });
+
+        if (headlineResponse.success && headlineResponse.data?.data) {
+          const headlines = headlineResponse.data.data
+            .filter((news: NewsItem) => news.is_headline === true)
+            .map((news: NewsItem) => ({
+              id: news.id,
+              title: news.title,
+              slug: news.slug,
+              image: news.image,
+              category_name: news.category?.category_name || 'Sports',
+              description: news.description,
+              date: news.date,
+              total_views: news.total_views || 0,
+              is_headline: true,
+            }));
+
+          setHeadlineStories(headlines);
         }
       } catch (error) {
         console.error('Error fetching sports stories:', error);
@@ -146,7 +189,7 @@ export function SportsSection() {
           </Link>
 
           <div className="grid grid-cols-1 gap-5">
-            {sideStories.slice(0, 3).map((story) => (
+            {sideStories.map((story) => (
               <Link key={story.slug} to={`/story/${story.slug}`} className="group cursor-pointer">
                 <div className="relative h-40 bg-gray-200 dark:bg-gray-800 overflow-hidden mb-1 rounded-lg">
                   <FavoriteButton
@@ -173,27 +216,24 @@ export function SportsSection() {
             ))}
           </div>
 
-          {sideStories.length > 2 && sideStories.slice(2).filter((story) => story.is_headline === true).length > 0 && (
+          {headlineStories.length > 0 && (
             <div className="w-full">
               <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">Sport News Headlines</h3>
               <ul className="space-y-3 sm:space-y-4 w-full">
-                {sideStories
-                  .slice(2)
-                  .filter((story) => story.is_headline === true)
-                  .map((story) => (
-                    <li key={story.slug} className="text-gray-900 dark:text-white flex items-start sm:items-center gap-2">
-                      <span className="flex-shrink-0 mt-1 sm:mt-0">•</span>
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                        <Link
-                          to={`/story/${story.slug}`}
-                          className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
-                        >
-                          {story.title}
-                        </Link>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{formatTimeAgo(story.date)}</span>
-                      </div>
-                    </li>
-                  ))}
+                {headlineStories.map((story) => (
+                  <li key={story.slug} className="text-gray-900 dark:text-white flex items-start sm:items-center gap-2">
+                    <span className="flex-shrink-0 mt-1 sm:mt-0">•</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
+                      <Link
+                        to={`/story/${story.slug}`}
+                        className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
+                      >
+                        {story.title}
+                      </Link>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{formatTimeAgo(story.date)}</span>
+                    </div>
+                  </li>
+                ))}
               </ul>
             </div>
           )}

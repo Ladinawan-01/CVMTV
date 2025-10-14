@@ -16,11 +16,25 @@ interface Story {
   total_views: number;
 }
 
+interface NewsItem {
+  id: number;
+  title: string;
+  slug: string;
+  image: string;
+  date: string;
+  total_views: number;
+  is_headline: boolean;
+  category?: {
+    category_name: string;
+  };
+}
+
 export function NewsGrid() {
   const { setShowLoginModal } = useAuth();
   const [storiesByCategory, setStoriesByCategory] = useState<Record<string, Story[]>>({});
+  const [headlinesByCategory, setHeadlinesByCategory] = useState<Record<string, Story[]>>({});
   const [loading, setLoading] = useState(true);
-
+console.log(headlinesByCategory,'headlinesByCategory')
   useEffect(() => {
     const fetchStories = async () => {
       try {
@@ -29,9 +43,11 @@ export function NewsGrid() {
         // Fetch different category sections
         const categorySlugs = ['news', 'politics-jamaica', 'business-news'];
         const results: Record<string, Story[]> = {};
+        const headlinesResults: Record<string, Story[]> = {};
 
         await Promise.all(
           categorySlugs.map(async (slug) => {
+            // Fetch regular news
             const response = await apiClient.getNewsByCategory({
               category_slug: slug,
               language_id: 1,
@@ -40,7 +56,7 @@ export function NewsGrid() {
             });
 
             if (response.success && response.data?.data) {
-              const stories = response.data.data.map((news: any) => ({
+              const stories = response.data.data.map((news: NewsItem) => ({
                 id: news.id,
                 title: news.title,
                 slug: news.slug,
@@ -53,11 +69,36 @@ export function NewsGrid() {
               // Use category name as key
               const categoryName = stories[0]?.category_name || slug;
               results[categoryName] = stories;
+
+              // Fetch headlines for this category
+              const headlineResponse = await apiClient.getHeadlineCategory({
+                category_slug: slug,
+                language_id: 1,
+                offset: 0,
+                limit: 10,
+              });
+
+              if (headlineResponse.success && headlineResponse.data?.data) {
+                const headlines = headlineResponse.data.data
+                  .filter((news: NewsItem) => news.is_headline === true)
+                  .map((news: NewsItem) => ({
+                    id: news.id,
+                    title: news.title,
+                    slug: news.slug,
+                    image: news.image,
+                    category_name: news.category?.category_name || 'News',
+                    date: news.date,
+                    total_views: news.total_views || 0,
+                  }));
+
+                headlinesResults[categoryName] = headlines;
+              }
             }
           })
         );
 
         setStoriesByCategory(results);
+        setHeadlinesByCategory(headlinesResults);
       } catch (error) {
         console.error('Error fetching news grid:', error);
       } finally {
@@ -146,7 +187,7 @@ export function NewsGrid() {
                     </Link>
 
                     {storiesByCategory[config.name].length > 1 && (
-                      <div className="pt-4">
+                      <div className="pt-4   dark:border-gray-600 pb-4">
                         <ul className="space-y-3">
                           {storiesByCategory[config.name].slice(1, 6).map((story) => (
                             <li key={story.slug}>
@@ -162,6 +203,8 @@ export function NewsGrid() {
                         </ul>
                       </div>
                     )}
+
+                   
                   </>
                 )}
               </div>

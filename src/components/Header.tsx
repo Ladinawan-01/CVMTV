@@ -1,7 +1,6 @@
 import { Menu, Search, Moon, Sun } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getStories } from '../data/stories';
 import { UserAvatar } from './UserAvatar';
 import { apiClient } from '../lib/apiClient';
 
@@ -10,6 +9,12 @@ interface Category {
   category_name: string;
   slug: string;
   row_order: number;
+}
+
+interface BreakingNews {
+  id: number;
+  title: string;
+  slug: string;
 }
 
 export function Header() {
@@ -21,7 +26,7 @@ export function Header() {
     const saved = localStorage.getItem('darkMode');
     return saved ? JSON.parse(saved) : true;
   });
-  const [newsHeadlines, setNewsHeadlines] = useState<Array<{ title: string; slug: string }>>([]);
+  const [newsHeadlines, setNewsHeadlines] = useState<BreakingNews[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
@@ -34,12 +39,26 @@ export function Header() {
   }, [darkMode]);
 
   useEffect(() => {
-    const fetchHeadlines = () => {
-      const data = getStories({ limit: 10, orderBy: 'published_at' }).map(s => ({
-        title: s.title,
-        slug: s.slug
-      }));
-      setNewsHeadlines(data);
+    const fetchHeadlines = async () => {
+      try {
+        // Fetch breaking news from API
+        const response = await apiClient.getBreakingNews({
+          language_id: 1,
+          offset: 0,
+          limit: 15,
+        });
+
+        if (response.success && response.data?.data) {
+          const headlines = response.data.data.map((news: any) => ({
+            id: news.id,
+            title: news.title,
+            slug: news.slug,
+          }));
+          setNewsHeadlines(headlines);
+        }
+      } catch (error) {
+        console.error('Error fetching breaking news:', error);
+      }
     };
 
     fetchHeadlines();
