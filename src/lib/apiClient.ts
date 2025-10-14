@@ -482,6 +482,18 @@ class CVMApiClient {
     return this.get(`/get_breaking_news?${queryParams.toString()}`);
   }
 
+  /**
+   * Set like/dislike for news
+   * POST /set_like_dislike
+   * REQUIRES AUTHENTICATION
+   */
+  async setLikeDislike(data: {
+    news_id: number;
+    status: 1 | 0; // 1 = like, 0 = remove like/dislike
+  }): Promise<ApiResponse> {
+    return this.post('/set_like_dislike', data);
+  }
+
   // ============================================
   // User Profile APIs
   // ============================================

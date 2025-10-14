@@ -20,6 +20,7 @@ interface HeadlineNews {
   title: string;
   slug: string;
   date: string;
+  is_headline: boolean;
 }
 
 export function HeroSection() {
@@ -44,21 +45,27 @@ export function HeroSection() {
           setBreakingNews(breakingResponse.data.data);
         }
 
-        // Fetch headline news
+        // Fetch headline news (only articles with is_headline: true)
         const headlineResponse = await apiClient.getNewsByCategory({
           category_slug: 'news',
           language_id: 1,
           offset: 0,
-          limit: 8,
+          limit: 20, // Fetch more to ensure we get enough headlines
         });
 
         if (headlineResponse.success && headlineResponse.data?.data) {
-          const headlines = headlineResponse.data.data.map((news: any) => ({
-            id: news.id,
-            title: news.title,
-            slug: news.slug,
-            date: news.date,
-          }));
+          // Filter only articles where is_headline is true
+          const headlines = headlineResponse.data.data
+            .filter((news: any) => news.is_headline === true)
+            .map((news: any) => ({
+              id: news.id,
+              title: news.title,
+              slug: news.slug,
+              date: news.date,
+              is_headline: news.is_headline,
+            }))
+            .slice(0, 8); // Take only first 8 headlines
+          
           setHeadlineNews(headlines);
         }
       } catch (error) {
@@ -210,9 +217,11 @@ export function HeroSection() {
             </div>
 
             <div className="w-full">
+              {headlineNews.length > 0 && (
               <div className="border-b-2 border-blue-600 dark:border-blue-400 pb-2 mb-4">
                 <h2 className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase">Headline News</h2>
               </div>
+              )}
               <ul className="space-y-3 sm:space-y-4 w-full">
                 {!loading && headlineNews.map((news) => (
                   <li key={news.id} className="text-gray-900 dark:text-white flex items-start sm:items-center gap-2">

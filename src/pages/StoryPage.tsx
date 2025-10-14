@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, Eye, ArrowLeft, Home, Share2 } from 'lucide-react';
+import { Calendar, Eye, ArrowLeft, Home } from 'lucide-react';
 import { apiClient } from '../lib/apiClient';
 import { StoryDetailSkeleton } from '../components/Skeleton';
+import { LikeButton } from '../components/LikeButton';
+import { useAuth } from '../context/AuthContext';
 
 interface StoryDetail {
   id: number;
@@ -14,6 +16,7 @@ interface StoryDetail {
   description: string;
   total_views: number;
   total_like: number;
+  like: number; // 0 or 1 - indicates if current user liked
   category: {
     id: number;
     category_name: string;
@@ -36,6 +39,7 @@ interface AdSpace {
 
 export function StoryPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { setShowLoginModal } = useAuth();
   const [story, setStory] = useState<StoryDetail | null>(null);
   const [relatedStories, setRelatedStories] = useState<StoryDetail[]>([]);
   const [adSpaces, setAdSpaces] = useState<AdSpace[]>([]);
@@ -180,19 +184,21 @@ export function StoryPage() {
                 {story.title}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400 pb-6 border-b border-gray-200 dark:border-gray-800">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-4 pb-6 border-b border-gray-200 dark:border-gray-800">
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                   <Calendar size={16} />
                   <span>{formatDate(story.date)}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                   <Eye size={16} />
                   <span>{story.total_views.toLocaleString()} views</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Share2 size={16} />
-                  <span>{story.total_like} likes</span>
-                </div>
+                <LikeButton
+                  newsId={story.id}
+                  initialLiked={story.like === 1}
+                  initialLikeCount={story.total_like}
+                  onLoginRequired={() => setShowLoginModal(true)}
+                />
               </div>
             </div>
 

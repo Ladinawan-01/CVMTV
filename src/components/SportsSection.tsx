@@ -15,6 +15,7 @@ interface Story {
   description: string;
   date: string;
   total_views: number;
+  is_headline: boolean;
 }
 
 export function SportsSection() {
@@ -44,6 +45,7 @@ export function SportsSection() {
             description: news.description,
             date: news.date,
             total_views: news.total_views || 0,
+            is_headline: news.is_headline || false,
           }));
 
           setMainStory(stories[0]);
@@ -171,25 +173,30 @@ export function SportsSection() {
             ))}
           </div>
 
-          <div className="w-full">
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">Sport News Headlines</h3>
-            <ul className="space-y-3 sm:space-y-4 w-full">
-              {sideStories.slice(2).map((story) => (
-                <li key={story.slug} className="text-gray-900 dark:text-white flex items-start sm:items-center gap-2">
-                  <span className="flex-shrink-0 mt-1 sm:mt-0">•</span>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
-                    <Link
-                      to={`/story/${story.slug}`}
-                      className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
-                    >
-                      {story.title}
-                    </Link>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{formatTimeAgo(story.date)}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {sideStories.length > 2 && sideStories.slice(2).filter((story) => story.is_headline === true).length > 0 && (
+            <div className="w-full">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">Sport News Headlines</h3>
+              <ul className="space-y-3 sm:space-y-4 w-full">
+                {sideStories
+                  .slice(2)
+                  .filter((story) => story.is_headline === true)
+                  .map((story) => (
+                    <li key={story.slug} className="text-gray-900 dark:text-white flex items-start sm:items-center gap-2">
+                      <span className="flex-shrink-0 mt-1 sm:mt-0">•</span>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
+                        <Link
+                          to={`/story/${story.slug}`}
+                          className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
+                        >
+                          {story.title}
+                        </Link>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{formatTimeAgo(story.date)}</span>
+                      </div>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </section>
