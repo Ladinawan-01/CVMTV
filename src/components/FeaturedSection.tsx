@@ -5,6 +5,7 @@ import { FavoriteButton } from './FavoriteButton';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../lib/apiClient';
 import { FeaturedStorySkeleton, TrendingStorySkeleton } from './Skeleton';
+import { FeaturedSection as FeaturedSectionType, NewsArticle } from '../types/api';
 
 interface Story {
   id: number;
@@ -17,11 +18,26 @@ interface Story {
   total_views: number;
 }
 
+interface AdSpace {
+  id: number;
+  language_id: number;
+  category_id: number | null;
+  ad_space: string | null;
+  ad_featured_section_id: number;
+  ad_image: string;
+  web_ad_image: string;
+  ad_url: string;
+  date: string;
+  status: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export function FeaturedSection() {
   const { setShowLoginModal } = useAuth();
   const [latestStories, setLatestStories] = useState<Story[]>([]);
   const [trendingStories, setTrendingStories] = useState<Story[]>([]);
-  const [adBanner, setAdBanner] = useState<string>('');
+  const [adSpace, setAdSpace] = useState<AdSpace | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,12 +52,12 @@ export function FeaturedSection() {
 
         if (response.success && response.data?.data) {
           // Find "Lead Stories" section or use first section
-          const leadSection = response.data.data.find((s: any) => 
+          const leadSection = response.data.data.find((s: FeaturedSectionType) => 
             s.slug === 'lead-stories' || s.title.toLowerCase().includes('lead')
           ) || response.data.data[0];
 
           if (leadSection && leadSection.news) {
-            const stories = leadSection.news.map((news: any) => ({
+            const stories = leadSection.news.map((news: NewsArticle) => ({
               id: news.id,
               title: news.title,
               slug: news.slug,
@@ -55,9 +71,9 @@ export function FeaturedSection() {
             setLatestStories(stories.slice(0, 4));
             setTrendingStories(stories.slice(0, 8));
 
-            // Set ad banner if available
+            // Set ad space if available
             if (leadSection.ad_spaces && leadSection.ad_spaces.length > 0) {
-              setAdBanner(leadSection.ad_spaces[0].web_ad_image || leadSection.ad_spaces[0].ad_image);
+              setAdSpace(leadSection.ad_spaces[0]);
             }
           }
         }
@@ -127,13 +143,22 @@ export function FeaturedSection() {
   return (
     <section className="bg-white dark:bg-gray-950 py-8 sm:py-12 border-t border-gray-200 dark:border-gray-800 transition-colors overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
-        <div className="mb-6 sm:mb-8 flex justify-center">
-          <img
-            src={adBanner || "/cvmtv-banner.png"}
-            alt="Advertisement"
-            className="max-w-full h-auto"
-          />
-        </div>
+        {adSpace && (
+          <div className="mb-6 sm:mb-8 flex justify-center">
+            <a 
+              href={adSpace.ad_url || '#'} 
+              target={adSpace.ad_url ? '_blank' : '_self'}
+              rel={adSpace.ad_url ? 'noopener noreferrer' : undefined}
+              className="cursor-pointer hover:opacity-90 transition-opacity"
+            >
+              <img
+                src={adSpace.web_ad_image || adSpace.ad_image}
+                alt="Advertisement"
+                className="max-w-full h-auto"
+              />
+            </a>
+          </div>
+        )}
         <div className="grid lg:grid-cols-3 gap-6 sm:gap-8 w-full">
           <div className="lg:col-span-2">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 pb-3 border-b-2 border-gray-900 dark:border-white">

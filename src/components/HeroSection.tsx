@@ -14,6 +14,7 @@ interface BreakingNews {
   date: string;
   total_views: number;
   is_headline: boolean;
+  created_at: string;
 }
 
 interface HeadlineNews {
@@ -22,6 +23,7 @@ interface HeadlineNews {
   slug: string;
   date: string;
   is_headline: boolean;
+  created_at: string;
 }
 
 interface NewsItem {
@@ -30,12 +32,29 @@ interface NewsItem {
   slug: string;
   date: string;
   is_headline: boolean;
+  created_at: string;
+}
+
+interface AdSpace {
+  id: number;
+  language_id: number;
+  category_id: number | null;
+  ad_space: string;
+  ad_featured_section_id: number;
+  ad_image: string;
+  web_ad_image: string;
+  ad_url: string;
+  date: string;
+  status: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export function HeroSection() {
   const { setShowLoginModal } = useAuth();
   const [breakingNews, setBreakingNews] = useState<BreakingNews[]>([]);
   const [headlineNews, setHeadlineNews] = useState<HeadlineNews[]>([]);
+  const [adSpace, setAdSpace] = useState<AdSpace | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,6 +73,11 @@ export function HeroSection() {
         if (breakingResponse.success && breakingResponse.data?.data) {
           fetchedBreakingNews = breakingResponse.data.data;
           setBreakingNews(fetchedBreakingNews);
+          
+          // Set ad space if available
+          if (breakingResponse.data.ad_spaces) {
+            setAdSpace(breakingResponse.data.ad_spaces);
+          }
         }
 
         // Fetch headline news using getHeadlineCategory
@@ -164,13 +188,22 @@ export function HeroSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full">
         <div className="mb-6 sm:mb-8 grid lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2">
-            <div className="rounded-lg overflow-hidden flex items-center justify-center bg-[#D97E33]">
-              <img
-                src="/buzzad2.png"
-                alt="Advertisement"
-                className="w-full h-auto"
-              />
-            </div>
+            {!loading && adSpace ? (
+              <a 
+                href={adSpace.ad_url || '#'} 
+                target={adSpace.ad_url ? '_blank' : '_self'}
+                rel={adSpace.ad_url ? 'noopener noreferrer' : undefined}
+                className="rounded-lg overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-gray-800 cursor-pointer hover:opacity-90 transition-opacity"
+              >
+                <img
+                  src={adSpace.web_ad_image || adSpace.ad_image}
+                  alt="Advertisement"
+                  className="w-full h-auto"
+                />
+              </a>
+            ) : (
+              <div className="rounded-lg overflow-hidden flex items-center justify-center bg-gray-200 dark:bg-gray-700 h-[200px] animate-pulse" />
+            )}
           </div>
           <div className="lg:col-span-1">
             <LiveVideoThumbnail />

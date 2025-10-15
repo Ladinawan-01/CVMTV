@@ -32,11 +32,27 @@ interface NewsItem {
   };
 }
 
+interface AdSpace {
+  id: number;
+  language_id: number;
+  category_id: number | null;
+  ad_space: string | null;
+  ad_featured_section_id: number;
+  ad_image: string;
+  web_ad_image: string;
+  ad_url: string;
+  date: string;
+  status: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export function BusinessSection() {
   const { setShowLoginModal } = useAuth();
   const [mainStory, setMainStory] = useState<Story | null>(null);
   const [sideStories, setSideStories] = useState<Story[]>([]);
   const [headlineStories, setHeadlineStories] = useState<Story[]>([]);
+  const [adSpace, setAdSpace] = useState<AdSpace | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -67,6 +83,11 @@ export function BusinessSection() {
 
           setMainStory(stories[0]);
           setSideStories(stories.slice(1, 3));
+          
+          // Set ad space if available
+          if (response.data.ad_spaces) {
+            setAdSpace(response.data.ad_spaces);
+          }
         }
 
         // Fetch headline business news
@@ -149,11 +170,22 @@ export function BusinessSection() {
     <section className="py-8 sm:py-12 transition-colors overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
         <div className="mb-6 sm:mb-8 flex justify-center">
-          <img
-            src="/cvmtv-banner.png"
-            alt="Advertisement"
-            className="max-w-full h-auto"
-          />
+          {adSpace ? (
+            <a 
+              href={adSpace.ad_url || '#'} 
+              target={adSpace.ad_url ? '_blank' : '_self'}
+              rel={adSpace.ad_url ? 'noopener noreferrer' : undefined}
+              className="cursor-pointer hover:opacity-90 transition-opacity"
+            >
+              <img
+                src={adSpace.web_ad_image || adSpace.ad_image}
+                alt="Advertisement"
+                className="max-w-full h-auto"
+              />
+            </a>
+          ) : (
+            <div className="w-full max-w-3xl h-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          )}
         </div>
 
         <Link to="/category/business">

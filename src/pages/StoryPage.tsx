@@ -29,11 +29,27 @@ interface StoryDetail {
   }>;
 }
 
+interface AdSpace {
+  id: number;
+  language_id: number;
+  category_id: number | null;
+  ad_space: string | null;
+  ad_featured_section_id: number;
+  ad_image: string;
+  web_ad_image: string;
+  ad_url: string;
+  date: string;
+  status: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export function StoryPage() {
   const { slug } = useParams<{ slug: string }>();
   const { setShowLoginModal } = useAuth();
   const [story, setStory] = useState<StoryDetail | null>(null);
   const [relatedStories, setRelatedStories] = useState<StoryDetail[]>([]);
+  const [adSpace, setAdSpace] = useState<AdSpace | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,6 +70,11 @@ export function StoryPage() {
           const articleData = response.data.data[0];
           setStory(articleData);
 
+          // Set ad space if available
+          if (response.data.ad_spaces) {
+            setAdSpace(response.data.ad_spaces);
+          }
+
           // Fetch related articles from same category
           if (articleData.category) {
             const relatedResponse = await apiClient.getNewsByCategory({
@@ -68,6 +89,11 @@ export function StoryPage() {
                 .filter((s: StoryDetail) => s.slug !== slug)
                 .slice(0, 3);
               setRelatedStories(related);
+              
+              // If no ad space from news detail, try from category
+              if (!response.data.ad_spaces && relatedResponse.data.ad_spaces) {
+                setAdSpace(relatedResponse.data.ad_spaces);
+              }
             }
           }
         }
@@ -119,7 +145,23 @@ export function StoryPage() {
     <article className="bg-white dark:bg-gray-950 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
-        
+        {/* Ad Banner - Only show if available */}
+        {adSpace && (
+          <div className="mb-6 sm:mb-8 flex justify-center">
+            <a 
+              href={adSpace.ad_url || '#'} 
+              target={adSpace.ad_url ? '_blank' : '_self'}
+              rel={adSpace.ad_url ? 'noopener noreferrer' : undefined}
+              className="cursor-pointer hover:opacity-90 transition-opacity"
+            >
+              <img
+                src={adSpace.web_ad_image || adSpace.ad_image}
+                alt="Advertisement"
+                className="max-w-full h-auto rounded-lg"
+              />
+            </a>
+          </div>
+        )}
 
         <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
