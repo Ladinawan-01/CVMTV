@@ -40,10 +40,11 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 transition-colors relative">
       {showHeaderFooter && <Header />}
-      {showBanner && <AdBanner />}
-      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
-      <QuickActionsMenu />
-      <Routes>
+      <main>
+        {showBanner && <AdBanner />}
+        <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+        <QuickActionsMenu />
+        <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/story/:slug" element={<StoryPage />} />
         <Route path="/category/:category" element={<CategoryPage />} />
@@ -62,6 +63,7 @@ function AppContent() {
         <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="/search" element={<SearchResultsPage />} />
       </Routes>
+      </main>
       {showHeaderFooter && <Footer />}
     </div>
   );

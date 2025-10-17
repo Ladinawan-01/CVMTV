@@ -114,23 +114,29 @@ export function Header() {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 transition-colors">
-      <div className="bg-blue-700 dark:bg-blue-900 text-white overflow-hidden w-full">
+    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors">
+      <div className="bg-blue-700 dark:bg-blue-900 text-white overflow-hidden w-full fixed top-0 left-0 right-0 z-50 shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between text-sm">
           <div className="flex items-center gap-2 sm:gap-6 flex-1 min-w-0">
             <span className="hidden md:block text-xs font-medium whitespace-nowrap flex-shrink-0">BREAKING NEWS</span>
             <div className="flex-1 min-w-0 overflow-hidden relative">
-              <div className="animate-scroll whitespace-nowrap">
-                {newsHeadlines.concat(newsHeadlines).map((headline, index) => (
-                  <Link
-                    key={index}
-                    to={`/story/${headline.slug}`}
-                    className="text-white hover:text-yellow-400 mx-4 sm:mx-8 transition-colors inline-block"
-                  >
-                    {headline.title}
-                  </Link>
-                ))}
-              </div>
+              {newsHeadlines.length > 0 ? (
+                <div className="animate-scroll whitespace-nowrap">
+                  {newsHeadlines.concat(newsHeadlines).map((headline, index) => (
+                    <Link
+                      key={`${headline.id}-${index}`}
+                      to={`/story/${headline.slug}`}
+                      className="text-white hover:text-yellow-400 mx-4 sm:mx-8 transition-colors inline-block"
+                    >
+                      {headline.title}
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-white/70 text-xs animate-pulse">
+                  Loading breaking news...
+                </div>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
@@ -145,6 +151,8 @@ export function Header() {
           </div>
         </div>
       </div>
+
+      <div className="pt-[44px]"></div>
 
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between py-4 gap-2">
