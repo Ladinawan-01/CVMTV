@@ -219,7 +219,7 @@ export function BreakingNewsPage() {
                 <span>{formatDate(breakingNews.published_date || breakingNews.date)}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                <Eye size={16} />
+                <Eye size={16} /> 
                 <span>{breakingNews.total_views.toLocaleString()} views</span>
               </div>
               
