@@ -155,7 +155,7 @@ export function Header() {
     setSearchError(null);
     
     try {
-      const searchUrl = `https://cvmtv-website-redesi-v7u5.bolt.host/search?q=${encodeURIComponent(query)}`;
+      const searchUrl = `https://cvmapi.cvmtv.com/api/get_news?offset=0&limit=5&id=&get_user_news=&search=${encodeURIComponent(query)}&language_id=1&category_id=&category_slug=&subcategory_id=&subcategory_slug=&slug=&tag_id=`;
       console.log('Header: Fetching from:', searchUrl);
       
       const response = await fetch(searchUrl, {
