@@ -387,13 +387,14 @@ console.log(searchResults,'searchResults')
                           e.stopPropagation();
                           
                           console.log('CLICKED!', result.title);
-                          alert('CLICKED: ' + result.title);
                           
+                          // Navigate immediately
+                          navigate(`/story/${result.slug}`);
+                          
+                          // Close dropdown after navigation
                           setShowSearchDropdown(false);
                           setSearchExpanded(false);
                           setSearchQuery('');
-                          
-                          navigate(`/story/${result.slug}`);
                         }}
                       >
                         <div className="flex gap-4">
