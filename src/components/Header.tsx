@@ -357,7 +357,7 @@ export function Header() {
               </button>
             </form>
             
-            {searchExpanded && showSearchDropdown && (
+            { searchExpanded && (
               <div
                 ref={searchDropdownRef}
                 className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl z-50 max-h-[300px] overflow-y-auto w-full min-w-[400px] max-w-[600px]"
@@ -401,15 +401,11 @@ export function Header() {
                       </div>
                     </div>
                     {searchResults.map((result) => (
-                      <button
+                      <Link
                         key={result.id}
-                        type="button"
+                        to={`/story/${result.slug}`}
                         className="w-full text-left p-6 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/10 dark:hover:to-indigo-900/10 transition-all duration-300 border-b border-gray-100 dark:border-gray-800 last:border-b-0 group cursor-pointer hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 search-result-button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleSearchResultClick(result);
-                        }}
+                         
                       >
                         <div className="flex gap-4">
                           <div className="flex-shrink-0 w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-xl overflow-hidden shadow-md">
@@ -437,7 +433,7 @@ export function Header() {
                             </div>
                           </div>
                         </div>
-                      </button>
+                      </Link>
                     ))}
                     {searchResults.length > 0 && (
                       <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-blue-900/20 border-t border-gray-200 dark:border-gray-700">
@@ -453,7 +449,7 @@ export function Header() {
                   </div>
                 )}
               </div>
-            )}
+              )}
           </div>
         </div>
       </div>
