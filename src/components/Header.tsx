@@ -155,17 +155,35 @@ export function Header() {
     setSearchError(null);
     
     try {
-      const response = await apiClient.searchNews({
-        q: query,
-        language_id: 1,
-        limit: 8,
+      const searchUrl = `https://cvmtv-website-redesi-v7u5.bolt.host/search?q=${encodeURIComponent(query)}`;
+      console.log('Header: Fetching from:', searchUrl);
+      
+      const response = await fetch(searchUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
       });
 
-      console.log('Header: Search API Response:', response);
+      console.log('Header: Search API Response Status:', response.status);
 
-      if (response.success && response.data?.data) {
-        setSearchResults(response.data.data);
-        console.log('Header: Found results:', response.data.data.length);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Header: Search API Data:', data);
+
+      // Handle the response - adjust based on actual API response structure
+      if (data && Array.isArray(data)) {
+        setSearchResults(data);
+        console.log('Header: Found results:', data.length);
+      } else if (data?.data && Array.isArray(data.data)) {
+        setSearchResults(data.data);
+        console.log('Header: Found results:', data.data.length);
+      } else if (data?.results && Array.isArray(data.results)) {
+        setSearchResults(data.results);
+        console.log('Header: Found results:', data.results.length);
       } else {
         setSearchResults([]);
         console.log('Header: No results found');
