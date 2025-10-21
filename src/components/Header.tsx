@@ -382,21 +382,18 @@ console.log(searchResults,'searchResults')
                         key={result.id}
                         type="button"
                         className="w-full text-left p-6 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/10 dark:hover:to-indigo-900/10 transition-all duration-300 border-b border-gray-100 dark:border-gray-800 last:border-b-0 group cursor-pointer hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        onClick={() => {
-                          console.log('Header: BUTTON CLICKED!');
-                          console.log('Header: Story slug:', result.slug);
-                          console.log('Header: Story title:', result.title);
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           
-                          // Show alert immediately
-                           
-                          // Close dropdown
+                          console.log('CLICKED!', result.title);
+                          alert('CLICKED: ' + result.title);
+                          
                           setShowSearchDropdown(false);
                           setSearchExpanded(false);
                           setSearchQuery('');
                           
-                          // Navigate immediately
-                          console.log('Header: Navigating to:', `/story/${result.slug}`);
-                          window.location.href = `/story/${result.slug}`;
+                          navigate(`/story/${result.slug}`);
                         }}
                       >
                         <div className="flex gap-4">
@@ -415,19 +412,7 @@ console.log(searchResults,'searchResults')
                               {stripHtml(result.description)}
                             </p>
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4 text-sm">
-                                <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 text-blue-700 dark:text-blue-300 rounded-full font-bold text-xs shadow-sm">
-                                  {result.category.category_name}
-                                </span>
-                                <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                                  <Clock size={14} />
-                                  <span className="font-medium">{formatDate(result.date)}</span>
-                                </div>
-                                <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                                  <Eye size={14} />
-                                  <span className="font-medium">{result.total_views.toLocaleString()}</span>
-                                </div>
-                              </div>
+                            
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                   View Article
