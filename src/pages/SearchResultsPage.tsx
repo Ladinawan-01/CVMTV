@@ -1,124 +1,200 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { searchStories, Story } from '../data/stories';
-import { FavoriteButton } from '../components/FavoriteButton';
+import { Calendar, Eye, ArrowLeft, Home } from 'lucide-react';
+import { apiClient } from '../lib/apiClient';
+import { StoryDetailSkeleton } from '../components/Skeleton';
+import { LikeButton } from '../components/LikeButton';
 import { useAuth } from '../context/AuthContext';
+
+interface SearchResult {
+  id: number;
+  title: string;
+  slug: string;
+  image: string;
+  date: string;
+  description: string;
+  total_views: number;
+  total_like: number;
+  like: number;
+  category: {
+    id: number;
+    category_name: string;
+    slug: string;
+  };
+  tag: Array<{
+    id: number;
+    tag_name: string;
+    slug: string;
+  }>;
+}
 
 export function SearchResultsPage() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
-  const [stories, setStories] = useState<Story[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(true);
   const { setShowLoginModal } = useAuth();
 
   useEffect(() => {
-    const doSearch = () => {
+    const doSearch = async () => {
       if (!query) {
-        setStories([]);
+        setResults([]);
         setLoading(false);
         return;
       }
 
       setLoading(true);
+      window.scrollTo(0, 0);
 
-      const data = searchStories(query);
-      setStories(data);
+      try {
+        const response = await apiClient.searchNews({
+          q: query,
+          language_id: 1,
+          limit: 20,
+        });
 
-      setLoading(false);
+        if (response.success && response.data?.data) {
+          setResults(response.data.data);
+        } else {
+          setResults([]);
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
     };
 
     doSearch();
   }, [query]);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-
-    if (diffInHours < 1) {
-      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-      return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
-    } else if (diffInHours < 24) {
-      return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
-    } else {
-      const diffInDays = Math.floor(diffInHours / 24);
-      return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
-    }
+  const stripHtml = (html: string) => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
   };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  if (loading) {
+    return <StoryDetailSkeleton />;
+  }
 
   return (
     <main className="bg-white dark:bg-gray-950 min-h-screen transition-colors">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <div className="flex items-center gap-4 mb-6">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors"
+              aria-label="Home"
+            >
+              <Home size={20} />
+            </Link>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors"
+            >
+              <ArrowLeft size={20} />
+              <span className="font-semibold">Back to Home</span>
+            </Link>
+          </div>
+
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Search Results
           </h1>
+          
           {query && (
-            <p className="text-gray-600 dark:text-gray-400">
-              Showing results for: <span className="font-semibold">{query}</span>
-            </p>
+            <div className="flex items-center gap-4 mb-6">
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
+                {results.length} result{results.length !== 1 ? 's' : ''} found for
+              </p>
+              <span className="text-gray-500 dark:text-gray-500">•</span>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Query: <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{query}</code>
+              </p>
+            </div>
           )}
         </div>
 
-        {loading ? (
+        {results.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-400">Searching...</p>
-          </div>
-        ) : stories.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-400">
-              {query ? 'No results found. Try a different search term.' : 'Enter a search term to find stories.'}
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              No results found
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              {query ? `No results found for "${query}". Try a different search term.` : 'Enter a search term to find stories.'}
             </p>
+            <Link
+              to="/"
+              className="text-blue-600 dark:text-blue-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors"
+            >
+              Return to homepage
+            </Link>
           </div>
         ) : (
-          <>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Found {stories.length} result{stories.length !== 1 ? 's' : ''}
-            </p>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {stories.map((story) => (
-                <div key={story.id} className="group">
-                  <Link to={`/story/${story.slug}`} className="block">
-                    <div className="relative h-48 bg-gray-200 dark:bg-gray-800 overflow-hidden mb-4 rounded-lg">
-                      <FavoriteButton
-                        storyId={story.slug}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {results.map((article) => (
+              <article
+                key={article.id}
+                className="bg-white dark:bg-gray-900 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden group"
+              >
+                <Link to={`/story/${article.slug}`} className="block">
+                  <div className="relative h-48 sm:h-56 overflow-hidden">
+                    <img
+                      src={article.image}
+                      alt={article.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <span className="inline-block bg-blue-600 dark:bg-blue-700 text-white px-3 py-1 text-sm font-bold uppercase">
+                        {article.category.category_name}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 sm:p-6">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-yellow-500 dark:group-hover:text-yellow-400 transition-colors line-clamp-2">
+                      {article.title}
+                    </h2>
+                    
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
+                      {stripHtml(article.description)}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
+                      <div className="flex items-center gap-2">
+                        <Calendar size={16} />
+                        <span>{formatDate(article.date)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Eye size={16} />
+                        <span>{article.total_views.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <LikeButton
+                        newsId={article.id}
+                        initialLiked={article.like === 1}
+                        initialLikeCount={article.total_like}
                         onLoginRequired={() => setShowLoginModal(true)}
                       />
-                      <img
-                        src={story.image_url}
-                        alt={story.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
                     </div>
-                    <div className="mb-2">
-                      <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                        {story.category}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-yellow-500 dark:group-hover:text-yellow-400 transition-colors leading-tight">
-                      {story.title}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                      {story.excerpt}
-                    </p>
-                    <div className="flex items-center justify-between text-sm">
-                      <Link
-                        to={`/author/${encodeURIComponent(story.author)}`}
-                        className="text-gray-700 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        By {story.author}
-                      </Link>
-                      <span className="text-gray-500 dark:text-gray-400">
-                        {formatDate(story.created_at)}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </>
+                  </div>
+                </Link>
+              </article>
+            ))}
+          </div>
         )}
       </div>
     </main>

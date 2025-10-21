@@ -477,6 +477,44 @@ class CVMApiClient {
   }
 
   /**
+   * Get news by tag slug
+   * GET /get_news
+   */
+  async getNewsByTag(params: {
+    tag_slug: string;
+    language_id?: number;
+    offset?: number;
+    limit?: number;
+  }): Promise<ApiResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('tag_slug', params.tag_slug);
+    queryParams.append('language_id', (params?.language_id || 1).toString());
+    queryParams.append('offset', (params?.offset || 0).toString());
+    queryParams.append('limit', (params?.limit || 20).toString());
+
+    return this.get(`/get_news?${queryParams.toString()}`);
+  }
+
+  /**
+   * Search news by query
+   * GET /get_news
+   */
+  async searchNews(params: {
+    q: string;
+    language_id?: number;
+    offset?: number;
+    limit?: number;
+  }): Promise<ApiResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('q', params.q);
+    queryParams.append('language_id', (params?.language_id || 1).toString());
+    queryParams.append('offset', (params?.offset || 0).toString());
+    queryParams.append('limit', (params?.limit || 10).toString());
+
+    return this.get(`/get_news?${queryParams.toString()}`);
+  }
+
+  /**
    * Get breaking news
    * GET /get_breaking_news
    */

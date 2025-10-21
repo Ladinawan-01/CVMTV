@@ -148,8 +148,7 @@ export function HeroSection() {
     }
   };
   const formatHandlineTimeAgo = (dateString: string) => {
-    console.log(dateString,'dateString')
-    const date = new Date(dateString);
+     const date = new Date(dateString);
     const now = new Date();
     const diffInMs = now.getTime() - date.getTime();
     const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));

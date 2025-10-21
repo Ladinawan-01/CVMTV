@@ -34,8 +34,7 @@ export function NewsGrid() {
   const [storiesByCategory, setStoriesByCategory] = useState<Record<string, Story[]>>({});
   const [headlinesByCategory, setHeadlinesByCategory] = useState<Record<string, Story[]>>({});
   const [loading, setLoading] = useState(true);
-console.log(headlinesByCategory,'headlinesByCategory')
-  useEffect(() => {
+   useEffect(() => {
     const fetchStories = async () => {
       try {
         setLoading(true);
