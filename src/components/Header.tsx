@@ -400,6 +400,7 @@ export function Header() {
                         </div>
                       </div>
                     </div>
+                    <div className='p-4'>
                     {searchResults.map((result) => (
                       <Link
                         key={result.id}
@@ -446,6 +447,7 @@ export function Header() {
                         </Link>
                       </div>
                     )}
+                    </div>
                   </div>
                 )}
               </div>
