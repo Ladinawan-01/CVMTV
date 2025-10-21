@@ -44,7 +44,7 @@ export function AuthorPage() {
               <User className="text-gray-900 dark:text-white" size={32} />
             </div>
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">{authorName}</h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">{authorName}  - Rashid </h1>
               <p className="text-xl text-gray-600 dark:text-gray-400 mt-2">
                 {stories.length} {stories.length === 1 ? 'Story' : 'Stories'} Published
               </p>
