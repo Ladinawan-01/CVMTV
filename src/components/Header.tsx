@@ -1,8 +1,8 @@
-import { Menu, Search, Moon, Sun, Clock, Eye, ArrowRight } from 'lucide-react';
+import { Menu, Search, Moon, Sun, ArrowRight } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { UserAvatar } from './UserAvatar';
 import { apiClient } from '../lib/apiClient';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface Category {
   id: number;
@@ -202,16 +202,29 @@ export function Header() {
     setShowSearchDropdown(false);
   };
 
+  const handleSearchResultClick = (result: SearchResult) => {
+    console.log('Search result clicked:', result.title);
+    console.log('Navigating to:', `/story/${result.slug}`);
+    
+    // Navigate immediately
+    navigate(`/story/${result.slug}`);
+    
+    // Close dropdown after navigation
+    setShowSearchDropdown(false);
+    setSearchExpanded(false);
+    setSearchQuery('');
+  };
+
   // Handle click outside search dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchDropdownRef.current && !searchDropdownRef.current.contains(event.target as Node)) {
-        // Check if the click is not on a search result button
+        // Don't close if clicking on search result buttons
         const target = event.target as HTMLElement;
-        if (!target.closest('button[type="button"]')) {
+        if (!target.closest('button[type="button"]') && !target.closest('.search-result-button')) {
           setTimeout(() => {
             setShowSearchDropdown(false);
-          }, 150);
+          }, 200);
         }
       }
     };
@@ -228,14 +241,6 @@ export function Header() {
     return tmp.textContent || tmp.innerText || '';
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-console.log(searchResults,'searchResults')
   return (
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 transition-colors">
       <div className="bg-blue-700 dark:bg-blue-900 text-white overflow-hidden w-full fixed top-0 left-0 right-0 z-50 shadow-md">
@@ -381,20 +386,11 @@ console.log(searchResults,'searchResults')
                       <button
                         key={result.id}
                         type="button"
-                        className="w-full text-left p-6 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/10 dark:hover:to-indigo-900/10 transition-all duration-300 border-b border-gray-100 dark:border-gray-800 last:border-b-0 group cursor-pointer hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full text-left p-6 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/10 dark:hover:to-indigo-900/10 transition-all duration-300 border-b border-gray-100 dark:border-gray-800 last:border-b-0 group cursor-pointer hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 search-result-button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          
-                          console.log('CLICKED!', result.title);
-                          
-                          // Navigate immediately
-                          navigate(`/story/${result.slug}`);
-                          
-                          // Close dropdown after navigation
-                          setShowSearchDropdown(false);
-                          setSearchExpanded(false);
-                          setSearchQuery('');
+                          handleSearchResultClick(result);
                         }}
                       >
                         <div className="flex gap-4">
