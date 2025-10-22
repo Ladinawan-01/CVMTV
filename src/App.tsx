@@ -7,7 +7,9 @@ import { LoginModal } from './components/LoginModal';
 import { QuickActionsMenu } from './components/QuickActionsMenu';
 import { HomePage } from './pages/HomePage';
 import { StoryPage } from './pages/StoryPage';
+import { BreakingNewsPage } from './pages/BreakingNewsPage';
 import { CategoryPage } from './pages/CategoryPage';
+import { TagPage } from './pages/TagPage';
 import { AuthorPage } from './pages/AuthorPage';
 import { LiveBroadcastPage } from './pages/LiveBroadcastPage';
 import { AboutPage } from './pages/AboutPage';
@@ -47,7 +49,9 @@ function AppContent() {
         <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/story/:slug" element={<StoryPage />} />
+        <Route path="/breaking/:slug" element={<BreakingNewsPage />} />
         <Route path="/category/:category" element={<CategoryPage />} />
+        <Route path="/tag/:tag" element={<TagPage />} />
         <Route path="/author/:author" element={<AuthorPage />} />
         <Route path="/live" element={<LiveBroadcastPage />} />
         <Route path="/about" element={<AboutPage />} />

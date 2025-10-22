@@ -148,8 +148,7 @@ export function HeroSection() {
     }
   };
   const formatHandlineTimeAgo = (dateString: string) => {
-    console.log(dateString,'dateString')
-    const date = new Date(dateString);
+     const date = new Date(dateString);
     const now = new Date();
     const diffInMs = now.getTime() - date.getTime();
     const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
@@ -213,7 +212,7 @@ export function HeroSection() {
         <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 w-full overflow-hidden">
           {/* Main Breaking News */}
           {!loading && breakingNews[0] ? (
-            <Link to={`/story/${breakingNews[0].slug}`} className="relative group cursor-pointer block w-full">
+            <Link to={`/breaking/${breakingNews[0].slug}`} className="relative group cursor-pointer block w-full">
             <div className="relative h-[300px] sm:h-[350px] lg:h-[500px] bg-gray-900 overflow-hidden rounded-lg w-full">
               <FavoriteButton
                   storyId={breakingNews[0].slug}
@@ -250,7 +249,7 @@ export function HeroSection() {
           {/* Side Breaking News */}
           <div className="space-y-4 w-full min-w-0">
             {!loading && breakingNews.slice(1, 4).map((news) => (
-              <Link key={news.slug} to={`/story/${news.slug}`} className="relative group cursor-pointer block w-full">
+              <Link key={news.slug} to={`/breaking/${news.slug}`} className="relative group cursor-pointer block w-full">
               <div className="relative h-[155px] bg-gray-900 overflow-hidden rounded-lg w-full">
                 <FavoriteButton
                     storyId={news.slug}

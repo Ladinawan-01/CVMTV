@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, Eye, ArrowLeft, Home } from 'lucide-react';
+import { Calendar, Eye, ArrowLeft, Home, Tag } from 'lucide-react';
 import { apiClient } from '../lib/apiClient';
 import { StoryDetailSkeleton } from '../components/Skeleton';
 import { LikeButton } from '../components/LikeButton';
@@ -56,6 +56,7 @@ export function StoryPage() {
     const fetchStory = async () => {
       if (!slug) return;
 
+      console.log('StoryPage: Fetching story for slug:', slug);
       setLoading(true);
       window.scrollTo(0, 0);
 
@@ -223,15 +224,24 @@ export function StoryPage() {
 
             {/* Tags */}
             {story.tag && story.tag.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-8 pb-8 border-b border-gray-200 dark:border-gray-800">
-                {story.tag.map((tag) => (
-                  <span
-                    key={tag.id}
-                    className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
-                  >
-                    #{tag.tag_name}
-                  </span>
-                ))}
+              <div className="border-t border-b border-gray-200 dark:border-gray-800 pt-8 pb-8">
+                <div className="flex items-center gap-2">
+                  <Tag size={20} className="text-gray-600 dark:text-gray-400" />
+                  <h3 className="font-semibold text-gray-900 dark:text-white inline-flex items-center">
+                    Tags :
+                    <div className="flex flex-wrap gap-2 ml-2">
+                      {story.tag.map((tag) => (
+                        <Link
+                          key={tag.id}
+                          to={`/tag/${tag.slug}`}
+                          className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
+                        >
+                          {tag.tag_name}
+                        </Link>
+                      ))}
+                    </div>
+                  </h3>
+                </div>
               </div>
             )}
 
