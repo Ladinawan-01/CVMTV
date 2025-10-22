@@ -6,6 +6,7 @@ import { SkeletonImage, SkeletonText } from '../components/Skeleton';
 
 type Story = {
   id: number;
+  news_id: number;
   slug: string;
   title: string;
   category_id: number;
@@ -42,6 +43,7 @@ export function FavoritesPage() {
         offset: 0,
         limit: 10,
       });
+      console.log('response', response);
       if (response.success && response.data?.data) {
         setFavorites(response.data.data as Story[]);
       } else {
@@ -66,7 +68,7 @@ export function FavoritesPage() {
       });
       if (response.success) {
         // Update UI to remove from displayed favorites
-        setFavorites(prevFavorites => prevFavorites.filter(fav => fav.id !== news_id));
+        fetchBookmarks();
         console.log('Bookmark removed successfully');
       } else {
         console.error('Failed to remove bookmark:', response.error);
@@ -180,7 +182,7 @@ export function FavoritesPage() {
                 </Link>
                 <div className="px-4 pb-4">
                   <button
-                    onClick={() => handleRemoveFavorite(favorite.id)}
+                    onClick={() => handleRemoveFavorite(favorite.news_id)}
                     className="flex items-center gap-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-semibold transition-colors"
                   >
                     <Heart size={16} className="fill-current" />
