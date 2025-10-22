@@ -107,6 +107,25 @@ export function StoryPage() {
 
     fetchStory();
   }, [slug]);
+  
+    useEffect(() => {
+      if (story) {
+        const fetchViewCount = async () => {
+          const apiToken = localStorage.getItem('api_token');
+          if (!apiToken) {
+            // Don't hit the API if api_token is not present
+            return;
+          }
+          const response = await apiClient.userViewCount(story.id);
+          if (response.success) {
+            console.log('StoryPage: View count updated successfully');
+          } else {
+            console.error('StoryPage: Error updating view count:', response.error);
+          }
+        };
+        fetchViewCount();
+      }
+    }, [story]);
 
   if (loading) {
     return <StoryDetailSkeleton />;

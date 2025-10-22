@@ -111,6 +111,25 @@ export function BreakingNewsPage() {
     fetchBreakingNews();
   }, [slug]);
 
+  useEffect(() => {
+    if (breakingNews) {
+      const fetchViewCount = async () => {
+        const apiToken = localStorage.getItem('api_token');
+        if (!apiToken) {
+          // Don't hit the API if api_token is not present
+          return;
+        }
+        const response = await apiClient.userBreakingNewsViewCount(breakingNews.id);
+        if (response.success) {
+          console.log('BreakingNewsPage: View count updated successfully');
+        } else {
+          console.error('BreakingNewsPage: Error updating view count:', response.error);
+        }
+      };
+      fetchViewCount();
+    }
+  }, [breakingNews]);
+
   const stripHtml = (html: string) => {
     const tmp = document.createElement('div');
     tmp.innerHTML = html;

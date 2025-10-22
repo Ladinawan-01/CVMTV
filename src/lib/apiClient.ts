@@ -616,7 +616,16 @@ class CVMApiClient {
   async removeFavorite(storyId: string): Promise<ApiResponse> {
     return this.delete(`/user/favorites/${storyId}`);
   }
+  
+  async userViewCount(news_id: number): Promise<ApiResponse> {
+    return this.post('/set_news_view', { news_id });
+  }
 
+  async userBreakingNewsViewCount(breaking_news_id: number): Promise<ApiResponse> {
+    return this.post('/set_breaking_news_view', { breaking_news_id });
+  }
+
+ 
   // ============================================
   // Utility Methods
   // ============================================

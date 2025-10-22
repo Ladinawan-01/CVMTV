@@ -126,7 +126,7 @@ export function TagPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         
         {/* Ad Banner - Only show if available */}
-        {adSpace && (
+        {/* {adSpace && (
           <div className="mb-6 sm:mb-8 flex justify-center">
             <a 
               href={adSpace.ad_url || '#'} 
@@ -141,7 +141,7 @@ export function TagPage() {
               />
             </a>
           </div>
-        )}
+        )} */}
 
         {/* Header */}
         <div className="mb-8">

@@ -77,6 +77,8 @@ export function UserAvatar() {
 
   const handleLogout = () => {
     localStorage.removeItem('demoUser');
+    localStorage.removeItem('api_token');
+    localStorage.removeItem('user');
     setUser(null);
     setProfile(null);
     setIsOpen(false);
