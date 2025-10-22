@@ -198,7 +198,7 @@ export function ContactPage() {
               <div className="flex gap-4">
                 <Link
                   to="https://www.facebook.com/share/1ERLMt2udP/?mibextid=wwXIfr"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -206,7 +206,7 @@ export function ContactPage() {
                 </Link>
                 <Link
                   to="https://x.com/cvmtv?s=21"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -214,7 +214,7 @@ export function ContactPage() {
                 </Link>
                 <Link
                   to="https://www.instagram.com/cvm_television?igsh=MWo1cXR3cWtqbGkwYg=="
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -222,7 +222,7 @@ export function ContactPage() {
                 </Link>
                 <Link
                   to="https://youtube.com/@cvm_television?si=W-0AdX9XZdH4oAuKhttps://www.youtube.com/@cvm_television"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -230,7 +230,7 @@ export function ContactPage() {
                 </Link>
                 <Link
                   to="https://jm.linkedin.com/company/cvm-tv"
-                  className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -238,7 +238,7 @@ export function ContactPage() {
                 </Link>
               </div>
             </div>
-          </div>
+          </div> 
         </div>
       </div>
     </div>
