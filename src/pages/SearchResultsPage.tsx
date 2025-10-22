@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Calendar, Eye, ArrowLeft, Home } from 'lucide-react';
+import { Calendar, Eye, ArrowLeft, Home, User } from 'lucide-react';
 import { apiClient } from '../lib/apiClient';
 import { StoryDetailSkeleton } from '../components/Skeleton';
 import { LikeButton } from '../components/LikeButton';
@@ -173,6 +173,19 @@ export function SearchResultsPage() {
                     </p>
                     
                     <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    {article.tag && article.tag.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        <User size={14} />
+                        <span>
+                          <Link
+                              to={`/tag/${article.tag[0].slug}`}
+                            className="inline-flex items-center py-1 text-sm hover:text-blue-600 dark:hover:text-blue-600 transition-colors"
+                          >
+                            {article.tag[0].tag_name}
+                          </Link>
+                        </span>
+                      </div>
+                    )}
                       <div className="flex items-center gap-2">
                         <Calendar size={16} />
                         <span>{formatDate(article.date)}</span>
