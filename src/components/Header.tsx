@@ -271,7 +271,7 @@ export function Header() {
                   {newsHeadlines.concat(newsHeadlines).map((headline, index) => (
                     <Link
                       key={`${headline.id}-${index}`}
-                      to={`/story/${headline.slug}`}
+                      to={`/breaking/${headline.slug}`}
                       className="text-white hover:text-yellow-400 mx-4 sm:mx-8 transition-colors inline-block"
                     >
                       {headline.title}
@@ -439,7 +439,7 @@ export function Header() {
                     {searchResults.length > 0 && (
                       <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-blue-900/20 border-t border-gray-200 dark:border-gray-700">
                         <Link
-                          to={`/search?q=${encodeURIComponent(searchQuery)}`}
+                          to={`/search?search=${encodeURIComponent(searchQuery)}`}
                           onClick={handleResultClick}
                           className="block text-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold py-2 px-4 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all duration-300"
                         >
