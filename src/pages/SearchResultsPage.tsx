@@ -30,7 +30,7 @@ interface SearchResult {
 
 export function SearchResultsPage() {
   const [searchParams] = useSearchParams();
-  const query = searchParams.get('q') || '';
+  const query = searchParams.get('search') || '';
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(true);
   const { setShowLoginModal } = useAuth();
@@ -52,8 +52,8 @@ export function SearchResultsPage() {
           language_id: 1,
           limit: 20,
         });
-
-        if (response.success && response.data?.data) {
+        
+        if (response?.data?.data && Array.isArray(response.data.data)) {
           setResults(response.data.data);
         } else {
           setResults([]);
@@ -68,8 +68,7 @@ export function SearchResultsPage() {
 
     doSearch();
   }, [query]);
-
-  const stripHtml = (html: string) => {
+   const stripHtml = (html: string) => {
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
     return tmp.textContent || tmp.innerText || '';
@@ -182,14 +181,7 @@ export function SearchResultsPage() {
                       </div>
                     </div>
                     
-                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <LikeButton
-                        newsId={article.id}
-                        initialLiked={article.like === 1}
-                        initialLikeCount={article.total_like}
-                        onLoginRequired={() => setShowLoginModal(true)}
-                      />
-                    </div>
+                    
                   </div>
                 </Link>
               </article>
