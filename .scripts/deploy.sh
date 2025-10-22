@@ -23,7 +23,7 @@ echo "Building application..."
 /root/.nvm/versions/node/v20.18.2/bin/npm run build --ignore-engines
 
 # Restart the PM2 process 
-pm2 restart cmvtv_latest
+pm2 restart 11
 
 echo "Deployment finished!" 
 
