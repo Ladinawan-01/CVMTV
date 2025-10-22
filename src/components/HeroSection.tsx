@@ -14,6 +14,7 @@ interface BreakingNews {
   date: string;
   total_views: number;
   is_headline: boolean;
+  bookmark: number;
   created_at: string;
 }
 
@@ -23,6 +24,7 @@ interface HeadlineNews {
   slug: string;
   date: string;
   is_headline: boolean;
+  bookmark: number;
   created_at: string;
 }
 
@@ -32,6 +34,7 @@ interface NewsItem {
   slug: string;
   date: string;
   is_headline: boolean;
+  bookmark: number;
   created_at: string;
 }
 
@@ -98,6 +101,7 @@ export function HeroSection() {
               date: news.date,
               is_headline: news.is_headline,
               created_at: news.created_at,
+              bookmark: news.bookmark || 0,
             }));
 
           // Also add breaking news items with is_headline=true
@@ -110,6 +114,7 @@ export function HeroSection() {
               date: news.date,
               created_at: news.created_at,
               is_headline: news.is_headline,
+              bookmark: news.bookmark || 0,
             }));
 
           // Combine and deduplicate, then take first 8
@@ -214,10 +219,12 @@ export function HeroSection() {
           {!loading && breakingNews[0] ? (
             <Link to={`/breaking/${breakingNews[0].slug}`} className="relative group cursor-pointer block w-full">
             <div className="relative h-[300px] sm:h-[350px] lg:h-[500px] bg-gray-900 overflow-hidden rounded-lg w-full">
-              <FavoriteButton
+              {/* <FavoriteButton
                   storyId={breakingNews[0].slug}
                 onLoginRequired={() => setShowLoginModal(true)}
-              />
+                newsId={breakingNews[0].id}
+                favorited={breakingNews[0].bookmark === 1}
+              /> */}
               <img
                   src={breakingNews[0].image}
                   alt={breakingNews[0].title}
@@ -251,10 +258,12 @@ export function HeroSection() {
             {!loading && breakingNews.slice(1, 4).map((news) => (
               <Link key={news.slug} to={`/breaking/${news.slug}`} className="relative group cursor-pointer block w-full">
               <div className="relative h-[155px] bg-gray-900 overflow-hidden rounded-lg w-full">
-                <FavoriteButton
+                {/* <FavoriteButton
                     storyId={news.slug}
                   onLoginRequired={() => setShowLoginModal(true)}
-                />
+                  newsId={news.id}
+                  favorited={news.bookmark === 1}
+                  /> */}
                 <img
                     src={news.image}
                     alt={news.title}

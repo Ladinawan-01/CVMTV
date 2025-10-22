@@ -16,6 +16,7 @@ interface Story {
   description: string;
   date: string;
   total_views: number;
+  bookmark: number;
 }
 
 interface AdSpace {
@@ -66,6 +67,7 @@ export function FeaturedSection() {
               description: news.description,
               date: news.date,
               total_views: news.total_views || 0,
+              bookmark: news.bookmark || 0,
             }));
 
             setLatestStories(stories.slice(0, 4));
@@ -171,6 +173,8 @@ export function FeaturedSection() {
                     <FavoriteButton
                       storyId={story.slug}
                       onLoginRequired={() => setShowLoginModal(true)}
+                      newsId={story.id}
+                      favorited={story.bookmark === 1}
                     />
                     <img
                       src={story.image}

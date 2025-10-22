@@ -84,6 +84,8 @@ export function DynamicFeaturedSection({ section }: DynamicFeaturedSectionProps)
                       <FavoriteButton
                         storyId={story.slug}
                         onLoginRequired={() => setShowLoginModal(true)}
+                        newsId={story.id}
+                        favorited={story.bookmark === 1}
                       />
                       <img
                         src={story.image}
@@ -165,6 +167,8 @@ export function DynamicFeaturedSection({ section }: DynamicFeaturedSectionProps)
                       <FavoriteButton
                         storyId={story.slug}
                         onLoginRequired={() => setShowLoginModal(true)}
+                        newsId={story.id}
+                        favorited={story.bookmark === 1}
                       />
                       <img
                         src={story.image}
@@ -210,6 +214,8 @@ export function DynamicFeaturedSection({ section }: DynamicFeaturedSectionProps)
                   <FavoriteButton
                     storyId={story.slug}
                     onLoginRequired={() => setShowLoginModal(true)}
+                    newsId={story.id}
+                    favorited={story.bookmark === 1}
                   />
                   <img
                     src={story.image}
@@ -249,6 +255,8 @@ export function DynamicFeaturedSection({ section }: DynamicFeaturedSectionProps)
                   <FavoriteButton
                     storyId={story.slug}
                     onLoginRequired={() => setShowLoginModal(true)}
+                    newsId={story.id}
+                    favorited={story.bookmark === 1}
                   />
                   <img
                     src={story.image}

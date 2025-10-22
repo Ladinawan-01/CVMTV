@@ -16,6 +16,7 @@ interface Story {
   date: string;
   total_views: number;
   is_headline: boolean;
+  bookmark: number;
 }
 
 interface NewsItem {
@@ -79,6 +80,7 @@ export function BusinessSection() {
             date: news.date,
             total_views: news.total_views || 0,
             is_headline: news.is_headline || false,
+            bookmark: news.bookmark || 0,
           }));
 
           setMainStory(stories[0]);
@@ -111,6 +113,7 @@ export function BusinessSection() {
               date: news.date,
               total_views: news.total_views || 0,
               is_headline: true,
+              bookmark: news.bookmark || 0,
             }));
 
           setHeadlineStories(headlines);
@@ -200,6 +203,8 @@ export function BusinessSection() {
               <FavoriteButton
                 storyId={mainStory.slug}
                 onLoginRequired={() => setShowLoginModal(true)}
+                newsId={mainStory.id}
+                favorited={mainStory.bookmark === 1}
               />
               <img
                 src={mainStory.image}
@@ -286,6 +291,8 @@ export function BusinessSection() {
                     <FavoriteButton
                       storyId={story.slug}
                       onLoginRequired={() => setShowLoginModal(true)}
+                      newsId={story.id}
+                      favorited={story.bookmark === 1}
                     />
                     <img
                       src={story.image}

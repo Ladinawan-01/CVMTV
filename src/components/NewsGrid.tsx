@@ -14,6 +14,7 @@ interface Story {
   category_name: string;
   date: string;
   total_views: number;
+  bookmark: number;
 }
 
 interface NewsItem {
@@ -27,6 +28,7 @@ interface NewsItem {
   category?: {
     category_name: string;
   };
+  bookmark: number;
 }
 
 export function NewsGrid() {
@@ -63,6 +65,7 @@ export function NewsGrid() {
                 category_name: news.category?.category_name || 'News',
                 date: news.date,
                 total_views: news.total_views || 0,
+                bookmark: news.bookmark || 0,
               }));
 
               // Use category name as key
@@ -88,6 +91,7 @@ export function NewsGrid() {
                     category_name: news.category?.category_name || 'News',
                     date: news.date,
                     total_views: news.total_views || 0,
+                    bookmark: news.bookmark || 0,
                   }));
 
                 headlinesResults[categoryName] = headlines;
@@ -107,6 +111,7 @@ export function NewsGrid() {
 
     fetchStories();
   }, []);
+  
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -166,6 +171,8 @@ export function NewsGrid() {
                         <FavoriteButton
                           storyId={storiesByCategory[config.name][0].slug}
                           onLoginRequired={() => setShowLoginModal(true)}
+                          newsId={storiesByCategory[config.name][0].id}
+                          favorited={storiesByCategory[config.name][0].bookmark === 1}
                         />
                       <img
                         src={storiesByCategory[config.name][0].image}

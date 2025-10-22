@@ -34,7 +34,7 @@ export function LikeButton({ newsId, initialLiked, initialLikeCount, onLoginRequ
     setIsProcessing(true);
 
     try {
-      const response = await apiClient.setLikeDislike({
+      const response = await apiClient.setBookmark({
         news_id: newsId,
         status: liked ? 0 : 1, // Toggle: 1 to like, 0 to unlike
       });

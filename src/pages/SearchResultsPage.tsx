@@ -15,6 +15,8 @@ interface SearchResult {
   description: string;
   total_views: number;
   total_like: number;
+  total_bookmark: number;
+  bookmark: number;
   like: number;
   category: {
     id: number;
@@ -185,8 +187,8 @@ export function SearchResultsPage() {
                     <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                       <LikeButton
                         newsId={article.id}
-                        initialLiked={article.like === 1}
-                        initialLikeCount={article.total_like}
+                        initialLiked={article.bookmark === 1}
+                        initialLikeCount={article.total_bookmark}
                         onLoginRequired={() => setShowLoginModal(true)}
                       />
                     </div>

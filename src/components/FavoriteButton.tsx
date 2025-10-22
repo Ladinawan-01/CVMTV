@@ -1,34 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Heart } from 'lucide-react';
-import { isFavorited, addFavorite, removeFavorite } from '../data/stories';
+import { apiClient } from '../lib/apiClient';
 
 interface FavoriteButtonProps {
+  newsId: number;
   storyId: string;
   onLoginRequired: () => void;
+  favorited: boolean;
 }
 
-export function FavoriteButton({ storyId, onLoginRequired }: FavoriteButtonProps) {
-  const [favorited, setFavorited] = useState(false);
+// Favorited from params & show as such.
+export function FavoriteButton({ newsId, storyId, onLoginRequired, favorited }: FavoriteButtonProps) {
+  const [isFavorited, setIsFavorited] = useState(favorited);
   const [loading, setLoading] = useState(false);
+ 
 
-  useEffect(() => {
-    checkFavoriteStatus();
-    window.addEventListener('userLogin', checkFavoriteStatus);
-    return () => window.removeEventListener('userLogin', checkFavoriteStatus);
-  }, [storyId]);
-
-  const checkFavoriteStatus = () => {
-    const storedUser = localStorage.getItem('demoUser');
-    if (!storedUser) {
-      setFavorited(false);
-      return;
-    }
-
-    const user = JSON.parse(storedUser);
-    setFavorited(isFavorited(user.email, storyId));
-  };
-
-  const toggleFavorite = (e: React.MouseEvent) => {
+  const toggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -39,15 +26,18 @@ export function FavoriteButton({ storyId, onLoginRequired }: FavoriteButtonProps
     }
 
     setLoading(true);
-    const user = JSON.parse(storedUser);
 
     try {
-      if (favorited) {
-        removeFavorite(user.email, storyId);
-        setFavorited(false);
+      // Use the local state for POST value, but show UI immediately.
+      const response = await apiClient.setBookmark({
+        news_id: String(newsId),
+        status: isFavorited ? 0 : 1,
+      });
+
+      if (response.success) {
+        setIsFavorited((prev) => !prev);
       } else {
-        addFavorite(user.email, storyId);
-        setFavorited(true);
+        console.error('Failed to update favorite:', response.message ?? response.error);
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
@@ -61,11 +51,11 @@ export function FavoriteButton({ storyId, onLoginRequired }: FavoriteButtonProps
       onClick={toggleFavorite}
       disabled={loading}
       className="absolute top-2 right-2 z-10 p-2 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:scale-110 transition-transform disabled:opacity-50"
-      aria-label={favorited ? 'Remove from favorites' : 'Add to favorites'}
+      aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
     >
       <Heart
         size={20}
-        className={favorited ? 'fill-red-500 text-red-500' : 'text-gray-600 dark:text-gray-400'}
+        className={isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-600 dark:text-gray-400'}
       />
     </button>
   );

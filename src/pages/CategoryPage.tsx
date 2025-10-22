@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, Eye } from 'lucide-react';
+import { Calendar, Eye, User } from 'lucide-react';
 import { apiClient } from '../lib/apiClient';
 import { CategoryPageSkeleton } from '../components/Skeleton';
 import { AdSpace } from '../types/api';
@@ -10,6 +10,11 @@ interface NewsItem {
   title: string;
   slug: string;
   image: string;
+  tag: Array<{
+    id: number;
+    tag_name: string;
+    slug: string;
+  }>;
   date: string;
   published_date: string;
   description: string;
@@ -189,6 +194,19 @@ export function CategoryPage() {
                       {stripHtml(story.description)}
                     </p>
                     <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-500">
+                    {story.tag && story.tag.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        <User size={14} />
+                        <span>
+                          <Link
+                            to={`/tag/${story.tag[0].slug}`}
+                            className="inline-flex items-center py-1 text-sm hover:text-blue-600 dark:hover:text-blue-600 transition-colors"
+                          >
+                            {story.tag[0].tag_name}
+                          </Link>
+                        </span>
+                      </div>
+                    )}
                       <div className="flex items-center gap-1">
                         <Calendar size={14} />
                         <span>{formatDate(story.date)}</span>

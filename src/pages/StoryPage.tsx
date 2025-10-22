@@ -16,6 +16,8 @@ interface StoryDetail {
   description: string;
   total_views: number;
   total_like: number;
+  total_bookmark: number;
+  bookmark: number;
   like: number; // 0 or 1 - indicates if current user liked
   category: {
     id: number;
@@ -238,8 +240,8 @@ export function StoryPage() {
                 </div>
                 <LikeButton
                   newsId={story.id}
-                  initialLiked={story.like === 1}
-                  initialLikeCount={story.total_like}
+                  initialLiked={story.bookmark === 1}
+                  initialLikeCount={story.total_bookmark}
                   onLoginRequired={() => setShowLoginModal(true)}
                 />
               </div>

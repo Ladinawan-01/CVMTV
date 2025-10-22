@@ -625,6 +625,31 @@ class CVMApiClient {
     return this.post('/set_breaking_news_view', { breaking_news_id });
   }
 
+  async setBookmark(data: {
+    news_id: number;
+    status: number;
+  }): Promise<ApiResponse> {
+    return this.post(`/set_bookmark`, data);
+  }
+  async deleteBookmark(news_id: number): Promise<ApiResponse> {
+    // Always set status to 0 when deleting bookmark
+    return this.post('/set_bookmark', { news_id, status: 0 });
+  }
+
+  async getBookmarks(params: {
+    language_id?: number;
+    offset?: number;
+    limit?: number;
+  }): Promise<ApiResponse> {
+    const queryParams = new URLSearchParams();
+    
+    queryParams.append('language_id', (params?.language_id || 1).toString());
+    queryParams.append('offset', (params?.offset || 0).toString());
+    queryParams.append('limit', (params?.limit || 20).toString());
+
+    return this.get(`/get_bookmark?${queryParams.toString()}`);
+  }
+ 
  
   // ============================================
   // Utility Methods
