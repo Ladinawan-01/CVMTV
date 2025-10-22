@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, Eye, ArrowLeft, Home, Tag } from 'lucide-react';
+import { Calendar, Eye, ArrowLeft, Home, Tag, User } from 'lucide-react';
 import { apiClient } from '../lib/apiClient';
 import { StoryDetailSkeleton } from '../components/Skeleton';
  import { useAuth } from '../context/AuthContext';
@@ -214,6 +214,24 @@ export function BreakingNewsPage() {
             </h1>
 
             <div className="flex flex-wrap items-center gap-4 pb-6 border-b border-gray-200 dark:border-gray-800">
+            {breakingNews.tag && breakingNews.tag.length > 0 && (
+              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                  <User size={16} />
+                  <span>
+                    {breakingNews.tag.map((tag, idx) => (
+                      <span key={tag.id}>
+                        <Link
+                          to={`/tag/${tag.slug}`}
+                          className="inline-flex items-center    py-1   text-sm hover:text-blue-600 dark:hover:text-blue-600 transition-colors"
+                        >
+                          {tag.tag_name}
+                        </Link>
+                        {idx < (breakingNews.tag?.length || 0) - 1 && <span>, </span>}
+                      </span>
+                    ))}
+                  </span>
+                </div>
+                 )}
               <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <Calendar size={16} />
                 <span>{formatDate(breakingNews.updated_at || breakingNews.date)}</span>
@@ -241,7 +259,7 @@ export function BreakingNewsPage() {
           />
 
           {/* Tags */}
-          {breakingNews.tag && breakingNews.tag.length > 0 && (
+          {/* {breakingNews.tag && breakingNews.tag.length > 0 && (
             <div className="border-t border-b border-gray-200 dark:border-gray-800 pt-8 pb-8">
               <div className="flex items-center gap-2">
                 <Tag size={20} className="text-gray-600 dark:text-gray-400" />
@@ -261,7 +279,7 @@ export function BreakingNewsPage() {
                 </h3>
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Related Breaking News */}
           {relatedNews.length > 0 && (

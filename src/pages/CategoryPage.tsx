@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Calendar, Eye } from 'lucide-react';
 import { apiClient } from '../lib/apiClient';
 import { CategoryPageSkeleton } from '../components/Skeleton';
+import { AdSpace } from '../types/api';
 
 interface NewsItem {
   id: number;
@@ -30,7 +31,7 @@ export function CategoryPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-
+  const [adSpace, setAdSpace] = useState<AdSpace | null>(null);
   useEffect(() => {
     const fetchStories = async () => {
       if (!category) return;
@@ -55,6 +56,9 @@ export function CategoryPage() {
             total: response.data.total || 0,
           });
           setHasMore(newsData.length === STORIES_PER_PAGE && response.data.total > STORIES_PER_PAGE);
+          if (response.data.ad_spaces) {
+            setAdSpace(response.data.ad_spaces);
+          }
         }
       } catch (error) {
         console.error('Error fetching category news:', error);
@@ -126,6 +130,22 @@ export function CategoryPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 py-6 sm:py-12 transition-colors">
+       {adSpace && (
+          <div className="mb-6 sm:mb-8 flex justify-center">
+            <a 
+              href={adSpace.ad_url || '#'} 
+              target={adSpace.ad_url ? '_blank' : '_self'}
+              rel={adSpace.ad_url ? 'noopener noreferrer' : undefined}
+              className="cursor-pointer hover:opacity-90 transition-opacity"
+            >
+              <img
+                src={adSpace.web_ad_image || adSpace.ad_image}
+                alt="Advertisement"
+                className="max-w-full h-auto rounded-lg"
+              />
+            </a>
+          </div>
+        )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">

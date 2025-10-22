@@ -94,7 +94,7 @@ export function TagPage() {
       <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            No news found for tag "{tag}"
+            No news found for author "{tag}"
           </h2>
           <Link
             to="/"
@@ -165,7 +165,7 @@ export function TagPage() {
           <div className="flex items-center gap-3 mb-4">
             <Tag size={24} className="text-blue-600 dark:text-blue-400" />
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">
-              Tag: {tagName || tag}
+              Author: {tagName || tag}
             </h1>
           </div>
           
@@ -175,7 +175,7 @@ export function TagPage() {
             </p>
             <span className="text-gray-500 dark:text-gray-500">•</span>
             <p className="text-gray-600 dark:text-gray-400 text-sm">
-              Tag slug: <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{tag}</code>
+              Author slug: <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{tag}</code>
             </p>
           </div>
         </div>
@@ -230,7 +230,7 @@ export function TagPage() {
         {news.length > 0 && (
           <div className="mt-12 text-center">
             <p className="text-gray-600 dark:text-gray-400">
-              Showing {news.length} article{news.length !== 1 ? 's' : ''} for tag "{tagName || tag}"
+              Showing {news.length} article{news.length !== 1 ? 's' : ''} for author "{tagName || tag}"
             </p>
           </div>
         )}

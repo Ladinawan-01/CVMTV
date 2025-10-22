@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -7,7 +7,19 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ isOpen, onClose }: LoginModalProps) {
+  const navigate = useNavigate();
+
   if (!isOpen) return null;
+
+  // Helper to close the modal before navigating
+  const handleNavigate = (to: string) => (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    event.preventDefault();
+    onClose();
+    // Navigation is deferred to after modal closes
+    setTimeout(() => {
+      navigate(to);
+    }, 0);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
@@ -48,12 +60,14 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           <div className="flex gap-3">
             <Link
               to="/login"
+              onClick={handleNavigate('/login')}
               className="flex-1 bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
             >
               Login
             </Link>
             <Link
               to="/register"
+              onClick={handleNavigate('/register')}
               className="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-semibold py-3 px-6 rounded-lg transition-colors"
             >
               Sign Up
