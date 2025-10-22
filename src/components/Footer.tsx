@@ -34,21 +34,46 @@ export function Footer() {
           <div>
             <h4 className="text-white font-bold text-lg mb-4">FOLLOW US</h4>
             <div className="flex gap-4 mb-4">
-              <a href="#" className="hover:text-yellow-400 transition-colors">
+              <Link
+                to="https://www.facebook.com/share/1ERLMt2udP/?mibextid=wwXIfr"
+                className="hover:text-yellow-400 transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Facebook size={20} />
-              </a>
-              <a href="#" className="hover:text-yellow-400 transition-colors">
+              </Link>
+              <Link
+                to="https://x.com/cvmtv?s=21"
+                className="hover:text-yellow-400 transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Twitter size={20} />
-              </a>
-              <a href="#" className="hover:text-yellow-400 transition-colors">
+              </Link>
+              <Link
+                to="https://www.instagram.com/cvm_television?igsh=MWo1cXR3cWtqbGkwYg=="
+                className="hover:text-yellow-400 transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Instagram size={20} />
-              </a>
-              <a href="#" className="hover:text-yellow-400 transition-colors">
+              </Link>
+              <Link
+                to="https://youtube.com/@cvm_television?si=W-0AdX9XZdH4oAuKhttps://www.youtube.com/@cvm_television"
+                className="hover:text-yellow-400 transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Youtube size={20} />
-              </a>
-              <a href="#" className="hover:text-yellow-400 transition-colors">
+              </Link>
+              <Link
+                to="https://jm.linkedin.com/company/cvm-tv"
+                className="hover:text-yellow-400 transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Linkedin size={20} />
-              </a>
+              </Link>
             </div>
             <p className="text-sm text-gray-400">Stay connected with the latest news and updates</p>
           </div>
