@@ -188,7 +188,7 @@ export function BusinessSection() {
           )}
         </div>
 
-        <Link to="/category/business">
+        <Link to="/category/business-news">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6 sm:mb-8 pb-3 border-b-2 border-gray-900 dark:border-white hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors inline-block">
             BUSINESS NEWS
           </h2>
