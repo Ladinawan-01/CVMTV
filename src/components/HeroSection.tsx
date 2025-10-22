@@ -293,23 +293,41 @@ export function HeroSection() {
               <ul className="space-y-2 w-full">
                 <li className="text-gray-900 dark:text-white flex items-center gap-2">
                   <span className="flex-shrink-0">•</span>
-                  <div className="flex justify-between items-center flex-1 min-w-0">
-                    <span className="font-medium text-sm sm:text-base">Morning Live</span>
-                    <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">6:00 AM</span>
+                 
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
+                    <Link
+                        to={`https://now.cvmtv.com/events/cvmtv`}
+                      className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
+                    >
+                        CVM TV
+                    </Link>
+                    
                   </div>
                 </li>
                 <li className="text-gray-900 dark:text-white flex items-center gap-2">
                   <span className="flex-shrink-0">•</span>
-                  <div className="flex justify-between items-center flex-1 min-w-0">
-                    <span className="font-medium text-sm sm:text-base">Prime Time News</span>
-                    <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">7:00 PM</span>
+                 
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
+                    <Link
+                        to={`https://now.cvmtv.com/events/cvm-plus`}
+                      className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
+                    >
+                        CVM plus
+                    </Link>
+                    
                   </div>
                 </li>
                 <li className="text-gray-900 dark:text-white flex items-center gap-2">
                   <span className="flex-shrink-0">•</span>
-                  <div className="flex justify-between items-center flex-1 min-w-0">
-                    <span className="font-medium text-sm sm:text-base">Sports Tonight</span>
-                    <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">10:00 PM</span>
+                 
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
+                    <Link
+                        to={`https://now.cvmtv.com/events/cvm-international`}
+                      className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
+                    >
+                        CVM International
+                    </Link>
+                    
                   </div>
                 </li>
               </ul>
@@ -327,7 +345,7 @@ export function HeroSection() {
                   <span className="flex-shrink-0 mt-1 sm:mt-0">•</span>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 flex-1 min-w-0">
                     <Link
-                        to={`/story/${news.slug}`}
+                        to={`/breaking/${news.slug}`}
                       className="hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors font-medium line-clamp-2 sm:line-clamp-1 sm:truncate flex-1 min-w-0 text-sm sm:text-base"
                     >
                         {news.title}
