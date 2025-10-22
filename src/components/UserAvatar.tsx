@@ -145,23 +145,7 @@ export function UserAvatar() {
               Profile
             </Link>
 
-            <Link
-              to="/user-profile"
-              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <User size={16} />
-              User Data
-            </Link>
-
-            <Link
-              to="/api-test"
-              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <User size={16} />
-              API Test
-            </Link>
+            
 
             <Link
               to="/favorites"
