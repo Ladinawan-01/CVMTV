@@ -271,7 +271,7 @@ export function Header() {
                   {newsHeadlines.concat(newsHeadlines).map((headline, index) => (
                     <Link
                       key={`${headline.id}-${index}`}
-                      to={`/story/${headline.slug}`}
+                      to={`/breaking/${headline.slug}`}
                       className="text-white hover:text-yellow-400 mx-4 sm:mx-8 transition-colors inline-block"
                     >
                       {headline.title}

@@ -32,7 +32,7 @@ interface NewsItem {
 export function NewsGrid() {
   const { setShowLoginModal } = useAuth();
   const [storiesByCategory, setStoriesByCategory] = useState<Record<string, Story[]>>({});
-  const [headlinesByCategory, setHeadlinesByCategory] = useState<Record<string, Story[]>>({});
+  const [categorySlugs, setCategorySlugs] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
    useEffect(() => {
     const fetchStories = async () => {
@@ -40,12 +40,12 @@ export function NewsGrid() {
         setLoading(true);
         
         // Fetch different category sections
-        const categorySlugs = ['news', 'politics-jamaica', 'business-news'];
+        const categorySlugList = ['news', 'politics-jamaica', 'business-news'];
         const results: Record<string, Story[]> = {};
-        const headlinesResults: Record<string, Story[]> = {};
+        const slugs: Record<string, string> = {};
 
         await Promise.all(
-          categorySlugs.map(async (slug) => {
+          categorySlugList.map(async (slug) => {
             // Fetch regular news
             const response = await apiClient.getNewsByCategory({
               category_slug: slug,
@@ -55,6 +55,7 @@ export function NewsGrid() {
             });
 
             if (response.success && response.data?.data) {
+              console.log(response,'response')
               const stories = response.data.data.map((news: NewsItem) => ({
                 id: news.id,
                 title: news.title,
@@ -65,39 +66,17 @@ export function NewsGrid() {
                 total_views: news.total_views || 0,
               }));
 
-              // Use category name as key
+              // Use category name as key and store the slug
               const categoryName = stories[0]?.category_name || slug;
               results[categoryName] = stories;
+              slugs[categoryName] = slug; // Store the actual slug for this category
 
-              // Fetch headlines for this category
-              const headlineResponse = await apiClient.getHeadlineCategory({
-                category_slug: slug,
-                language_id: 1,
-                offset: 0,
-                limit: 10,
-              });
-
-              if (headlineResponse.success && headlineResponse.data?.data) {
-                const headlines = headlineResponse.data.data
-                  .filter((news: NewsItem) => news.is_headline === true)
-                  .map((news: NewsItem) => ({
-                    id: news.id,
-                    title: news.title,
-                    slug: news.slug,
-                    image: news.image,
-                    category_name: news.category?.category_name || 'News',
-                    date: news.date,
-                    total_views: news.total_views || 0,
-                  }));
-
-                headlinesResults[categoryName] = headlines;
-              }
             }
           })
         );
 
         setStoriesByCategory(results);
-        setHeadlinesByCategory(headlinesResults);
+        setCategorySlugs(slugs);
       } catch (error) {
         console.error('Error fetching news grid:', error);
       } finally {
@@ -129,6 +108,7 @@ export function NewsGrid() {
   const categoryKeys = Object.keys(storiesByCategory).slice(0, 3);
   const categoryConfig = categoryKeys.map(name => ({
     name,
+    slug: categorySlugs[name] || name.toLowerCase(),
     color: 'text-blue-600 dark:text-blue-400',
     borderColor: 'border-blue-600 dark:border-blue-400'
   }));
@@ -146,14 +126,13 @@ export function NewsGrid() {
       </section>
     );
   }
-
-  return (
+   return (
     <section className="bg-gray-50 dark:bg-gray-900 py-8 sm:py-12 transition-colors overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 w-full">
           {categoryConfig.map((config) => (
             <div key={config.name}>
-              <Link to={`/category/${config.name.toLowerCase()}`}>
+              <Link to={`/category/${config.slug}`}>
                 <h3 className={`text-sm font-bold ${config.color} mb-4 pb-2 border-b-2 ${config.borderColor} hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors cursor-pointer`}>
                   {config.name.toUpperCase()}
                 </h3>
