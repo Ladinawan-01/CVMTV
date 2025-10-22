@@ -506,7 +506,7 @@ class CVMApiClient {
     limit?: number;
   }): Promise<ApiResponse> {
     const queryParams = new URLSearchParams();
-    queryParams.append('q', params.q);
+    queryParams.append('search', params.q);
     queryParams.append('language_id', (params?.language_id || 1).toString());
     queryParams.append('offset', (params?.offset || 0).toString());
     queryParams.append('limit', (params?.limit || 10).toString());
