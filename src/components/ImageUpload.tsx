@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { Upload, X } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 interface ImageUploadProps {
   currentImage?: string;
@@ -8,6 +9,7 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ currentImage, onImageChange, label = "Profile Image" }: ImageUploadProps) {
+  const { showError, showSuccess } = useToast();
   const [preview, setPreview] = useState<string>(currentImage || '');
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -17,12 +19,12 @@ export function ImageUpload({ currentImage, onImageChange, label = "Profile Imag
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      showError('Invalid File Type', 'Please select an image file (JPG, PNG, or GIF)', 4000);
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('Image size must be less than 5MB');
+      showError('File Too Large', 'Image size must be less than 5MB', 4000);
       return;
     }
 
@@ -34,9 +36,10 @@ export function ImageUpload({ currentImage, onImageChange, label = "Profile Imag
       setPreview(base64String);
       onImageChange(base64String);
       setUploading(false);
+      showSuccess('Image Uploaded!', 'Your image has been successfully uploaded', 3000);
     };
     reader.onerror = () => {
-      alert('Failed to read image file');
+      showError('Upload Failed', 'Failed to read image file. Please try again.', 4000);
       setUploading(false);
     };
     reader.readAsDataURL(file);
@@ -48,6 +51,7 @@ export function ImageUpload({ currentImage, onImageChange, label = "Profile Imag
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+    showSuccess('Image Removed', 'Your image has been successfully removed', 3000);
   };
 
   const handleClick = () => {

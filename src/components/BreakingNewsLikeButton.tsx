@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { apiClient } from '../lib/apiClient';
 
-interface LikeButtonProps {
+interface BreakingNewsLikeButtonProps {
   newsId: number;
   initialLiked: boolean;
   onLoginRequired: () => void;
 }
 
-export function LikeButton({ newsId, initialLiked, onLoginRequired }: LikeButtonProps) {
+export function BreakingNewsLikeButton({ newsId, initialLiked, onLoginRequired }: BreakingNewsLikeButtonProps) {
   const [liked, setLiked] = useState(initialLiked);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -31,8 +31,8 @@ export function LikeButton({ newsId, initialLiked, onLoginRequired }: LikeButton
     setIsProcessing(true);
 
     try {
-      const response = await apiClient.setBookmark({
-        news_id: newsId,
+      const response = await apiClient.setBreakingNewsBookmark({
+        breaking_news_id: newsId,
         status: liked ? 0 : 1, // Toggle: 1 to like, 0 to unlike
       });
 
@@ -68,4 +68,3 @@ export function LikeButton({ newsId, initialLiked, onLoginRequired }: LikeButton
     </button>
   );
 }
-

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, Eye, ArrowLeft, Home, Tag, User } from 'lucide-react';
+import { Calendar, Eye, ArrowLeft, Home, User } from 'lucide-react';
 import { apiClient } from '../lib/apiClient';
 import { StoryDetailSkeleton } from '../components/Skeleton';
- import { useAuth } from '../context/AuthContext';
+import { BreakingNewsLikeButton } from '../components/BreakingNewsLikeButton';
+import { useAuth } from '../context/AuthContext';
 
 interface BreakingNewsDetail {
   id: number;
@@ -15,6 +16,8 @@ interface BreakingNewsDetail {
   description: string;
   total_views: number;
   total_like: number;
+  total_bookmark: number;
+  bookmark: number;
   like: number;
   is_headline: boolean;
   category?: {
@@ -253,13 +256,17 @@ export function BreakingNewsPage() {
                  )}
               <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <Calendar size={16} />
-                <span>{formatDate(breakingNews.updated_at || breakingNews.date)}</span>
+                <span>{formatDate(breakingNews.date)}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <Eye size={16} /> 
                 <span>{breakingNews.total_views.toLocaleString()} views</span>
               </div>
-              
+              <BreakingNewsLikeButton
+                newsId={breakingNews.id}
+                initialLiked={breakingNews.bookmark === 1}
+                onLoginRequired={() => setShowLoginModal(true)}
+              />
             </div>
           </div>
 

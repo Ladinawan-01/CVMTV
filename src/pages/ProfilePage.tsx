@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { User, Mail, Save, X, Lock, Loader, Phone } from 'lucide-react';
 import { useUser } from '../context/UserContext';
+import { useToast } from '../context/ToastContext';
 
 export function ProfilePage() {
   const { user, loading, error, updateProfile, refreshUser } = useUser();
+  const { showSuccess, showError, showWarning } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -42,12 +44,12 @@ export function ProfilePage() {
     if (!user) return;
 
     if (!editedProfile.name.trim()) {
-      alert('Name is required');
+      showError('Name Required', 'Please enter your full name', 4000);
       return;
     }
 
     if (!editedProfile.email.trim()) {
-      alert('Email is required');
+      showError('Email Required', 'Please enter your email address', 4000);
       return;
     }
 
@@ -58,16 +60,16 @@ export function ProfilePage() {
       
       if (success) {
         setIsEditing(false);
-        alert('Profile updated successfully!');
+        showSuccess('Profile Updated!', 'Your profile has been successfully updated', 4000);
         console.log('Profile update successful');
         // No need to call refreshUser - updateProfile already updates the user data
         // The UI will automatically re-render with the updated user data from context
       } else {
-        alert('Failed to update profile. Please try again.');
+        showError('Update Failed', 'Failed to update profile. Please try again.', 4000);
       }
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert('An error occurred while updating profile');
+      showError('Update Error', 'An error occurred while updating profile', 4000);
     } finally {
       setSaving(false);
     }
@@ -77,18 +79,18 @@ export function ProfilePage() {
     if (!user) return;
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('New passwords do not match');
+      showError('Password Mismatch', 'New passwords do not match', 4000);
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      alert('New password must be at least 6 characters');
+      showWarning('Password Too Short', 'New password must be at least 6 characters', 4000);
       return;
     }
 
     const storedPassword = localStorage.getItem(`password_${user.email}`);
     if (storedPassword !== passwordData.currentPassword) {
-      alert('Current password is incorrect');
+      showError('Incorrect Password', 'Current password is incorrect', 4000);
       return;
     }
 
@@ -100,7 +102,7 @@ export function ProfilePage() {
       confirmPassword: ''
     });
     setIsChangingPassword(false);
-    alert('Password changed successfully!');
+    showSuccess('Password Changed!', 'Your password has been successfully updated', 4000);
   };
 
   const cancelEdit = () => {

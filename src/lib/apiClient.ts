@@ -636,6 +636,13 @@ class CVMApiClient {
     return this.post('/set_bookmark', { news_id, status: 0 });
   }
 
+  async setBreakingNewsBookmark(data: {
+    breaking_news_id: number;
+    status: number;
+  }): Promise<ApiResponse> {
+    return this.post(`/set_bookmark_breaking_news`, data);
+  }
+
   async getBookmarks(params: {
     language_id?: number;
     offset?: number;
@@ -648,6 +655,20 @@ class CVMApiClient {
     queryParams.append('limit', (params?.limit || 20).toString());
 
     return this.get(`/get_bookmark?${queryParams.toString()}`);
+  }
+
+  async getBookmarkBreakingNews(params: {
+    language_id?: number;
+    offset?: number;
+    limit?: number;
+  }): Promise<ApiResponse> {
+    const queryParams = new URLSearchParams();
+    
+    queryParams.append('language_id', (params?.language_id || 1).toString());
+    queryParams.append('offset', (params?.offset || 0).toString());
+    queryParams.append('limit', (params?.limit || 20).toString());
+
+    return this.get(`/get_bookmark_breaking_news?${queryParams.toString()}`);
   }
  
  

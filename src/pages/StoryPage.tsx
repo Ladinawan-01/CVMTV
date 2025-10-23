@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, Eye, ArrowLeft, Home, Tag , User } from 'lucide-react';
+import { Calendar, Eye, ArrowLeft, Home, User } from 'lucide-react';
 import { apiClient } from '../lib/apiClient';
 import { StoryDetailSkeleton } from '../components/Skeleton';
 import { LikeButton } from '../components/LikeButton';
@@ -241,7 +241,6 @@ export function StoryPage() {
                 <LikeButton
                   newsId={story.id}
                   initialLiked={story.bookmark === 1}
-                  initialLikeCount={story.total_bookmark}
                   onLoginRequired={() => setShowLoginModal(true)}
                 />
               </div>

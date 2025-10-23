@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { LiveVideoThumbnail } from './LiveVideoThumbnail';
-import { FavoriteButton } from './FavoriteButton';
+import { BreakingNewsFavoriteButton } from './BreakingNewsFavoriteButton';
 import { useAuth } from '../context/AuthContext';
 import { apiClient } from '../lib/apiClient';
 
@@ -219,12 +219,12 @@ export function HeroSection() {
           {!loading && breakingNews[0] ? (
             <Link to={`/breaking/${breakingNews[0].slug}`} className="relative group cursor-pointer block w-full">
             <div className="relative h-[300px] sm:h-[350px] lg:h-[500px] bg-gray-900 overflow-hidden rounded-lg w-full">
-              {/* <FavoriteButton
+              <BreakingNewsFavoriteButton
                   storyId={breakingNews[0].slug}
                 onLoginRequired={() => setShowLoginModal(true)}
                 newsId={breakingNews[0].id}
                 favorited={breakingNews[0].bookmark === 1}
-              /> */}
+              />
               <img
                   src={breakingNews[0].image}
                   alt={breakingNews[0].title}
@@ -258,12 +258,12 @@ export function HeroSection() {
             {!loading && breakingNews.slice(1, 4).map((news) => (
               <Link key={news.slug} to={`/breaking/${news.slug}`} className="relative group cursor-pointer block w-full">
               <div className="relative h-[155px] bg-gray-900 overflow-hidden rounded-lg w-full">
-                {/* <FavoriteButton
+                <BreakingNewsFavoriteButton
                     storyId={news.slug}
                   onLoginRequired={() => setShowLoginModal(true)}
                   newsId={news.id}
                   favorited={news.bookmark === 1}
-                  /> */}
+                  />
                 <img
                     src={news.image}
                     alt={news.title}
