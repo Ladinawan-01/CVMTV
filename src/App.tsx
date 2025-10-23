@@ -26,10 +26,13 @@ import { FavoritesPage } from './pages/FavoritesPage';
 import { SearchResultsPage } from './pages/SearchResultsPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { UserProvider } from './context/UserContext';
+import { ToastProvider, useToast } from './context/ToastContext';
+import { Toaster } from './components/Toaster';
 
 function AppContent() {
   const location = useLocation();
   const { showLoginModal, setShowLoginModal } = useAuth();
+  const { toasts, removeToast } = useToast();
   const noHeaderFooterPaths = ['/login', '/register'];
   const showHeaderFooter = !noHeaderFooterPaths.includes(location.pathname);
   const noBannerPaths = ['/', '/about', '/contact', '/privacy', '/terms', '/login', '/register'];
@@ -69,6 +72,7 @@ function AppContent() {
       </Routes>
       </main>
       {showHeaderFooter && <Footer />}
+      <Toaster toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }
@@ -78,7 +82,9 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <UserProvider>
-          <AppContent />
+          <ToastProvider>
+            <AppContent />
+          </ToastProvider>
         </UserProvider>
       </AuthProvider>
     </BrowserRouter>
