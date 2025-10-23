@@ -8,18 +8,22 @@ import { useAuth } from '../context/AuthContext';
 
 interface BreakingNewsDetail {
   id: number;
+  language_id: number;
   title: string;
   slug: string;
   image: string;
-  date: string;
-  published_date: string;
+  content_type: string;
+  content_value: string;
   description: string;
-  total_views: number;
-  total_like: number;
-  total_bookmark: number;
-  bookmark: number;
-  like: number;
+  meta_title: string;
+  meta_description: string;
+  meta_keyword: string;
+  schema_markup: string;
   is_headline: boolean;
+  created_at: string;
+  updated_at: string;
+  total_views: number;
+  bookmark: number;
   category?: {
     id: number;
     category_name: string;
@@ -140,7 +144,14 @@ export function BreakingNewsPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    if (!dateString) return 'Date not available';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return 'Invalid date';
+    }
+    
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -256,7 +267,7 @@ export function BreakingNewsPage() {
                  )}
               <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <Calendar size={16} />
-                <span>{formatDate(breakingNews.date)}</span>
+                <span>{formatDate(breakingNews.created_at)}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <Eye size={16} /> 
